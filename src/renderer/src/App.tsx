@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import ia from './assets/ia.svg'
 import keyboard from './assets/keyboard.svg'
-
 import Actions from './components/Actions'
 import Clock from './components/Clock'
 import ShortCuts from './components/Shortcuts'
@@ -16,8 +15,26 @@ const App = (): JSX.Element => {
     const [requestStatus, setRequestStatus] = useState<LoadingStatus>('idle')
 
     useEffect(() => {
+       setTimeout(() => {
+        console.log('?????????')
+        window.api.receive("fromMain", (response) => {
+            console.log("Received response from main process", response)
+        })
+       }, 5000)
         // quando iniciar a aplicação verificar o status.
         // sempre quando acontecer uma modificação na planilha atualizar os status das credenciais.
+    }, [])
+
+    useEffect(() => {
+        const handleKeyPress = (event: KeyboardEvent) => {
+            console.log(`You pressed ${event.key}`)
+        }
+
+        window.addEventListener('keyup', handleKeyPress)
+
+        return () => {
+            window.removeEventListener('keyup', handleKeyPress)
+        }
     }, [])
 
     function openClose() {
@@ -56,6 +73,7 @@ const App = (): JSX.Element => {
         </div>
 
         <Clock />
+        
         <p className="tip">
             {/* Please try pressing <code>F12</code> to open the devTool */}
             Aqui pode ter uma explicação do app

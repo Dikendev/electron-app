@@ -142,6 +142,11 @@ code {
   background-color: var(--ev-button-alt-hover-bg);
 }
 
+.help-link a {
+  text-decoration: none;
+  color: var(--ev-c-text-1);
+}
+
 .versions {
   position: absolute;
   bottom: 10px;
@@ -198,7 +203,6 @@ code {
   padding: 10px 10px;
   font-family: 'Menlo', 'Lucida Console', monospace;
   display: inline-flex;
-  overflow: hidden;
   align-items: center;
   border-radius: 8px;
   background-color: #202127;

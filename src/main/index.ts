@@ -1,7 +1,11 @@
-import { app, shell, BrowserWindow, ipcMain, Tray, Menu } from 'electron'
+import { app, shell, BrowserWindow, ipcMain, Tray, Menu, MenuItem, globalShortcut, dialog } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
+  import os from 'os'
+  import fs from 'fs'
+import path from 'path'
+
 
 function createWindow(): void {
   // Create the browser window.
@@ -33,13 +37,37 @@ function createWindow(): void {
   } else {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
   }
+
+  mainWindow.webContents.on('before-input-event', (event, input) => {
+    // add all the shortcuts here.
+    // and see how to call the api calls and change the app variables.
+    if (input.control && input.key.toLowerCase() === 'i') {
+      console.log('Pressed Ctrl+I')
+      event.preventDefault()
+    }
+
+    if (input.control && input.key.toLowerCase() === 'u') {
+      console.log('Pressed Ctrl+U')
+      event.preventDefault()
+    }
+  })
+
+  
+  ipcMain.on("toMain", (event, args) => {
+    const homeDir = os.homedir()
+    const pathUrl = path.join(homeDir, 'Desktop')
+    const responseData = { success: true, data: 'Sample Data' };
+    mainWindow.webContents.send("fromMain", responseData)
+
+    // fs.readFile(pathUrl, (error, data) => {
+      
+    // })
+  })
 }
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-let tray: Tray | null = null
-
 app.whenReady().then(() => {
   // Set app user model id for windows
   electronApp.setAppUserModelId('com.electron')
@@ -52,27 +80,39 @@ app.whenReady().then(() => {
     iconPath = join(__dirname, '../../resources/windows.ico');
   }
 
-  tray = new Tray(iconPath)
-  try {
-    const contextMenu = Menu.buildFromTemplate([
-      { label: 'Inicio expediente', type: 'radio'},
-      { label: 'Inicio almoço', type: 'radio' },
-      { label: 'Fim almoço', type: 'radio' },
-      { label: 'Fim expediente', type: 'radio'},
-      { label: 'Sair electron', type: 'radio', click: () => app.quit()},
-    ])
+  // Global shortcuts. Even if the app is not focus the shortcut works. in this case need to show a popup message
+  // showing the status of the requisition.
 
-    if (process.platform !== 'win32') {
-      contextMenu.items[1].checked = false
-      // Call this again for Linux because we modified the context menu
-    }
-    
-    tray.setToolTip('This is my application.')
-    tray.setContextMenu(contextMenu)
-  } catch (error) {
-    console.log('Aconteceu um erro')
+  //Today is better to listen to keyboard shortcuts when the window have focus
+  
+  // globalShortcut.register('Alt+CommandOrControl+I', () => {
+  //   console.log('Electron loves global shortcuts!')
+  // })
+
+  const tray: Tray= new Tray(iconPath)
+
+  const contextMenu = Menu.buildFromTemplate([
+    { label: 'Inicio expediente',submenu: [{
+      role: 'help', 
+      accelerator: process.platform === 'darwin' 
+        ? 'Alt+Cmd+I' 
+        : 'Alt+Shift+I',
+      click: () => {console.log('Electron rocks!')}
+    }]},
+    { label: 'Inicio almoço' },
+    { label: 'Fim almoço' },
+    { label: 'Fim expediente'},
+    { label: 'Sair electron', click: () => app.quit()},
+  ])
+
+  if (process.platform !== 'win32') {
+    contextMenu.items[1].checked = false
+    // Call this again for Linux because we modified the context menu
   }
 
+  tray.setToolTip('This is my application.')
+  tray.setContextMenu(contextMenu)
+ 
   // Default open or close DevTools by F12 in development
   // and ignore CommandOrControl + R in production.
   // see https://github.com/alex8088/electron-toolkit/tree/master/packages/utils
@@ -82,6 +122,13 @@ app.whenReady().then(() => {
 
   // IPC test
   ipcMain.on('ping', () => console.log('pong'))
+
+
+  ipcMain.handle('showSaveDialog', (event, method, params) => {
+    return dialog[method](params)
+  })
+
+  ipcMain.handle('get-dirname', () => __dirname)
 
   createWindow()
 
