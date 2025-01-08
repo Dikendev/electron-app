@@ -49,7 +49,7 @@ app.whenReady().then(() => {
   if (process.platform !== 'win32') {
     iconPath = join(__dirname, '../../resources/icon.png');
   } else {
-    iconPath = join(__dirname, '../../resources/icon.png');
+    iconPath = join(__dirname, '../../resources/windows.ico');
   }
 
   tray = new Tray(iconPath)
