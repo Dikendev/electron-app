@@ -11,7 +11,7 @@ const Clock = () => {
         setInterval(updateTime)
     }, [])
 
-    return <h1 className="ts">{ctime}</h1>
+    return <h1 className="ts">{ctime}</h1>
 }
 
 export default Clock
