@@ -1,55 +1,49 @@
-import { useEffect, useState } from "react"
 
 interface ShortCutsProps {
-    isOpen: boolean
+  isOpen: boolean
 }
 
 const ShortCuts = ({ isOpen }: ShortCutsProps) => {
-    const [platForm, setPlatForm] = useState<string>(window.api.os.platform)
+  const platform = window.api.os.platform
 
-    useEffect(() => {
-        if (platForm !== window.api.os.platform) {
-            setPlatForm(window.api.os.platform)
-        }
-    }, [window.api.os.platform])
+  if (!isOpen) return null
 
-    if (!isOpen) return null
+  return (
+    <div className="shortCuts">
+      <Command
+        commandName="Início expediente"
+        codeWin="shift + espaço + e"
+        codeMac="command + e"
+        platform={platform}
+      />
 
-    return (
-        <div className="shortCuts">
-            <Command
-                commandName="Início expediente"
-                codeWin="shift + command + e"
-                codeMac="c + e"
-                platform={platForm} />
+      <Command commandName="Início almoço" codeWin="shift + espaço + a" codeMac="command + a" platform={platform} />
 
-            <Command commandName="Início almoço" codeWin="shift + command + a" codeMac="c + a" platform={platForm} />
+      <Command commandName="Fim almoço" codeWin="shift + espaço + b" codeMac="command + b" platform={platform} />
 
-            <Command commandName="Fim almoço" codeWin="shift + command + b" codeMac="c + b" platform={platForm} />
-
-            <Command commandName="Fim expediente" codeWin="shift + command + f" codeMac="c + c" platform={platForm} />
-        </div>
-    )
+      <Command commandName="Fim expediente" codeWin="shift + espaço + f" codeMac="command + c" platform={platform} />
+    </div>
+  )
 }
 
 interface CommandProps {
-    commandName: string
-    codeWin: string
-    codeMac: string
-    platform: string
+  commandName: string
+  codeWin: string
+  codeMac: string
+  platform: string
 }
 const Command = ({ commandName, codeWin, codeMac, platform }: CommandProps) => {
-    return (
-        <div style={{ display: 'flex', justifyContent: 'space-between', width: "100%" }}>
-            <p style={{ fontSize: '0.8rem' }}>{commandName}</p>
+  return (
+    <div style={{ display: 'flex', justifyContent: 'space-between', width: "100%" }}>
+      <p style={{ fontSize: '0.8rem' }}>{commandName}</p>
 
-            {platform === 'win32' ? (
-                <p style={{ fontSize: '0.8rem' }}><code>{codeWin}</code></p>
-            ) : (
-                <p style={{ fontSize: '0.8rem' }}><code>{codeMac}</code></p>
-            )}
-        </div>
-    )
+      {platform === 'win32' ? (
+        <p style={{ fontSize: '0.8rem' }}><code>{codeWin}</code></p>
+      ) : (
+        <p style={{ fontSize: '0.8rem' }}><code>{codeMac}</code></p>
+      )}
+    </div>
+  )
 }
 
 export default ShortCuts
