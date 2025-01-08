@@ -1,30 +1,57 @@
 import { useEffect, useState } from 'react'
-import electronLogo from './assets/electron.svg'
+import ia from './assets/ia.svg'
+import keyboard from './assets/keyboard.svg'
+
 import Actions from './components/Actions'
 import Clock from './components/Clock'
 import ShortCuts from './components/Shortcuts'
 import Status from './components/Status'
 import Versions from './components/Versions'
+import Loading, { LoadingStatus } from './components/Loading'
 
 const App = (): JSX.Element => {
+    const [isOpen, setIsOpen] = useState(false)
     const [credentialStatus, setCredentialStatus] = useState<boolean>(true)
+
+    const [requestStatus, setRequestStatus] = useState<LoadingStatus>('idle')
 
     useEffect(() => {
         // quando iniciar a aplicação verificar o status.
         // sempre quando acontecer uma modificação na planilha atualizar os status das credenciais.
     }, [])
 
-    return (<>
-        <ShortCuts />
+    function openClose() {
+        setIsOpen((prev) => !prev)
+    }
 
-        <img alt="logo" className="logo" src={electronLogo} />
+    const simulateRequest = () => {
+        setTimeout(() => {
+            setRequestStatus('loading')
+        }, 0)
+
+        setTimeout(() => {
+            setRequestStatus('success')
+        }, 2000)
+        setTimeout(() => {
+            setRequestStatus('idle')
+        }, 3000)
+    }
+
+    return (<>
+        <div className="shortCuts_button">
+            <img style={{ color: 'white' }} alt="logo" className="shortcut_button" src={keyboard} onClick={openClose} />
+        </div>
+
+        <ShortCuts isOpen={isOpen} />
+
+        <img alt="logo" className="logo" src={ia} />
 
         <Status credentialStatus={credentialStatus} />
 
-        <div className="creator">COOP APP ELECTRON</div>
+        <div className="creator">automatizando processos</div>
         <div className="creator">Powered by Consistem</div>
         <div className="text">
-            Build an Electron app with <span className="react">React</span>
+            Electron app with <span className="react">React</span>
             &nbsp;and <span className="ts">TypeScript</span>
         </div>
 
@@ -34,7 +61,12 @@ const App = (): JSX.Element => {
             Aqui pode ter uma explicação do app
         </p>
 
-        <Actions credentialStatus={credentialStatus} />
+        <Actions credentialStatus={credentialStatus} simulate={simulateRequest} />
+
+        <div style={{ paddingTop: '3rem' }}>
+            <Loading status={requestStatus} />
+        </div>
+
         <Versions />
     </>)
 }

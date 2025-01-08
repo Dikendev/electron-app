@@ -1,4 +1,4 @@
-import { app, shell, BrowserWindow, ipcMain } from 'electron'
+import { app, shell, BrowserWindow, ipcMain, Tray, Menu } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
@@ -38,9 +38,40 @@ function createWindow(): void {
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
+let tray: Tray | null = null
+
 app.whenReady().then(() => {
   // Set app user model id for windows
   electronApp.setAppUserModelId('com.electron')
+  
+  let iconPath: string | null = null
+  
+  if (process.platform !== 'win32') {
+    iconPath = join(__dirname, '../../resources/icon.png');
+  } else {
+    iconPath = join(__dirname, '../../resources/icon.png');
+  }
+
+  tray = new Tray(iconPath)
+  try {
+    const contextMenu = Menu.buildFromTemplate([
+      { label: 'Inicio expediente', type: 'radio'},
+      { label: 'Inicio almoço', type: 'radio' },
+      { label: 'Fim almoço', type: 'radio' },
+      { label: 'Fim expediente', type: 'radio'},
+      { label: 'Sair electron', type: 'radio', click: () => app.quit()},
+    ])
+
+    if (process.platform !== 'win32') {
+      contextMenu.items[1].checked = false
+      // Call this again for Linux because we modified the context menu
+    }
+    
+    tray.setToolTip('This is my application.')
+    tray.setContextMenu(contextMenu)
+  } catch (error) {
+    console.log('Aconteceu um erro')
+  }
 
   // Default open or close DevTools by F12 in development
   // and ignore CommandOrControl + R in production.

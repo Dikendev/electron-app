@@ -1,8 +1,9 @@
 interface ActionsProps {
     credentialStatus: boolean
+    simulate: () => void
 }
 
-const Actions = ({ credentialStatus }: ActionsProps) => {
+const Actions = ({ credentialStatus, simulate }: ActionsProps) => {
     return (
         <div className="actions">
             <div className="action">
@@ -18,13 +19,13 @@ const Actions = ({ credentialStatus }: ActionsProps) => {
             </div>
 
             <div className={credentialStatus ? 'action' : 'action disabled'}>
-                <a target="_blank" rel="noreferrer" onClick={() => { }}>
+                <a target="_blank" rel="noreferrer" onClick={simulate}>
                     Fim do almoço
                 </a>
             </div>
 
             <div className="action">
-                <a target="_blank" rel="noreferrer" onClick={() => { }}>
+                <a target="_blank" rel="noreferrer" onClick={simulate}>
                     Fim do expediente
                 </a>
             </div>

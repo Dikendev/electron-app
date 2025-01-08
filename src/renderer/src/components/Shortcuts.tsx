@@ -1,80 +1,53 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
-const ShortCuts = () => {
-    const [isOpen, setIsOpen] = useState(false)
+interface ShortCutsProps {
+    isOpen: boolean
+}
 
-    if (!isOpen) return (
-        <div className="shortCuts_button">
-            <button onClick={openClose}>openClose</button>
-        </div>
-    )
-    function openClose() {
-        setIsOpen((prev) => !prev)
-    }
+const ShortCuts = ({ isOpen }: ShortCutsProps) => {
+    const [platForm, setPlatForm] = useState<string>(window.api.os.platform)
+
+    useEffect(() => {
+        if (platForm !== window.api.os.platform) {
+            setPlatForm(window.api.os.platform)
+        }
+    }, [window.api.os.platform])
+
+    if (!isOpen) return null
 
     return (
         <div className="shortCuts">
-            <button onClick={openClose}>openClose</button>
-            <div>
-                Início expediente
-                <div>
-                    <p>MacOs <code>command + 3</code></p>
-                </div>
+            <Command
+                commandName="Início expediente"
+                codeWin="shift + command + e"
+                codeMac="c + e"
+                platform={platForm} />
 
-                <div>
-                    <p>Windows <code>ctrl + 3</code></p>
-                </div>
+            <Command commandName="Início almoço" codeWin="shift + command + a" codeMac="c + a" platform={platForm} />
 
-                <div>
-                    <p>Linux <code>option + 3</code></p>
-                </div>
+            <Command commandName="Fim almoço" codeWin="shift + command + b" codeMac="c + b" platform={platForm} />
 
-            </div>
+            <Command commandName="Fim expediente" codeWin="shift + command + f" codeMac="c + c" platform={platForm} />
+        </div>
+    )
+}
 
-            <div>
-                Início almoço
-                <div>
-                    <p>MacOs <code>command + 3</code></p>
-                </div>
+interface CommandProps {
+    commandName: string
+    codeWin: string
+    codeMac: string
+    platform: string
+}
+const Command = ({ commandName, codeWin, codeMac, platform }: CommandProps) => {
+    return (
+        <div style={{ display: 'flex', justifyContent: 'space-between', width: "100%" }}>
+            <p style={{ fontSize: '0.8rem' }}>{commandName}</p>
 
-                <div>
-                    <p>Windows <code>ctrl + 3</code></p>
-                </div>
-
-                <div>
-                    <p>Linux <code>option + 3</code></p>
-                </div>
-            </div>
-
-            <div>
-                Fim almoço
-                <div>
-                    <p>MacOs <code>command + 3</code></p>
-                </div>
-
-                <div>
-                    <p>Windows <code>ctrl + 3</code></p>
-                </div>
-
-                <div>
-                    <p>Linux <code>option + 3</code></p>
-                </div>
-            </div>
-
-            <div>
-                Fim expediente
-                <div>
-                    <p>MacOs <code>command + 3</code></p>
-                </div>
-
-                <div>
-                    <p>Windows <code>ctrl + 3</code></p>
-                </div>
-
-                <div>
-                    <p>Linux <code>option + 3</code></p>
-                </div>
-            </div>
+            {platform === 'win32' ? (
+                <p style={{ fontSize: '0.8rem' }}><code>{codeWin}</code></p>
+            ) : (
+                <p style={{ fontSize: '0.8rem' }}><code>{codeMac}</code></p>
+            )}
         </div>
     )
 }
