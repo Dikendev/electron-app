@@ -1,11 +1,40 @@
-import { contextBridge } from 'electron'
+import { contextBridge, ipcRenderer } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
 import os from 'os'
+import fs from 'fs'
+import path from 'path'
+                
 // Custom APIs for renderer
+
 const api = {
   os: {
     platform: os.platform(),
-    type: os.type()
+    type: os.type(),
+    homeDir: os.homedir()
+  },
+  openDialog: (method, config) => ipcRenderer.invoke('showSaveDialog', method, config),
+  dirname: () => ipcRenderer.invoke('get-dirname'),
+  fs: fs,
+  path: path,
+  
+  // not working, find out why
+  send: (channel, data) => {
+    const validChannels = ["toMain"]
+
+    if (validChannels.includes(channel)) {
+      ipcRenderer.send(channel, data)
+    }
+  },
+  receive: (channel, func) => {
+    console.log('chamou o receive')
+    const validChannels = ["fromMain"]
+
+    console.log('channel', channel)
+    if (validChannels.includes(channel)) {
+    console.log('valido')
+
+      ipcRenderer.on(channel, (event, ...args) => func(...args))
+    }
   }
 }
 
