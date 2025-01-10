@@ -16,4 +16,4 @@ class HandleFiles {
 	}
 }
 
-export { HandleFiles }
+export default HandleFiles

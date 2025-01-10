@@ -3,9 +3,8 @@ import { electronAPI } from '@electron-toolkit/preload'
 import os from 'os'
 import fs from 'fs'
 import path from 'path'
-                
-// Custom APIs for renderer
 
+// Custom APIs for renderer
 const api = {
   os: {
     platform: os.platform(),
@@ -16,7 +15,7 @@ const api = {
   dirname: () => ipcRenderer.invoke('get-dirname'),
   fs: fs,
   path: path,
-  
+
   // not working, find out why
   send: (channel, data) => {
     const validChannels = ["toMain"]
@@ -31,11 +30,18 @@ const api = {
 
     console.log('channel', channel)
     if (validChannels.includes(channel)) {
-    console.log('valido')
+      console.log('valido')
 
       ipcRenderer.on(channel, (event, ...args) => func(...args))
     }
-  }
+  },
+
+  // mesmo entry point utilizado no renderer, agora posso utilizar na view
+  // e vai retornar com o método de two-way
+  openFile: () => ipcRenderer.invoke('dialog:openFile'),
+  savePreference: (key: string, value: string) => ipcRenderer.invoke('save-preferences', key, value),
+
+  loadPreferences: () => ipcRenderer.invoke("load-preferences")
 }
 
 // Use `contextBridge` APIs to expose Electron APIs to

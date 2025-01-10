@@ -1,13 +1,18 @@
 import { useRef, useState } from 'react'
 import gear from '../assets/gear.svg'
+import { UpdateAll } from './Status'
+import { CredentialInfo } from '../types/credential-info.interface'
 
-interface CredentialsProps {
-    privateKey?: string
-    clientEmail?: string
-    id?: string
+interface CredentialsProps extends CredentialInfo {
+    updateAll: UpdateAll
 }
 
-const Credentials = ({privateKey, clientEmail, id}: CredentialsProps) => {
+const Credentials = ({
+    privateKey,
+    clientEmail,
+    id,
+    updateAll
+}: CredentialsProps) => {
     const [isOpen, setIsOpen] = useState<boolean>(false)
 
     const openClose = () => {
@@ -16,12 +21,12 @@ const Credentials = ({privateKey, clientEmail, id}: CredentialsProps) => {
     }
 
     return (
-        <div style={{display: 'flex', position: 'relative'}}>
+        <div style={{ display: 'flex', position: 'relative' }}>
             <img style={{ color: 'white', marginBottom: '0px' }} alt="config" className="shortcut_button" src={gear} onClick={openClose} />
-            
+
             {isOpen ? (<>
-                <div style={{position: 'absolute', bottom: '-5.5rem', left: '-10rem'}}>
-                    <CredentialsModal privateKey={privateKey} clientEmail={clientEmail} id={id} />
+                <div style={{ position: 'absolute', bottom: '-10.5rem', left: '-10rem' }}>
+                    <CredentialsModal privateKey={privateKey} clientEmail={clientEmail} id={id} updateAll={updateAll} />
                 </div>
             </>) : null
             }
@@ -29,33 +34,39 @@ const Credentials = ({privateKey, clientEmail, id}: CredentialsProps) => {
     )
 }
 
-const CredentialsModal = ({privateKey, clientEmail, id}: CredentialsProps) => {
+const CredentialsModal = ({ privateKey, clientEmail, id, updateAll }: CredentialsProps) => {
     return (
         <div>
-            <CredentialKey description="id" key={id}/>
-            <CredentialKey description="client email" key={clientEmail}/>
-            <CredentialKey description="private key" key={privateKey}/>
+            <CredentialKey description="id" value={id} update={updateAll.updateId} />
+            <CredentialKey description="client email" value={clientEmail} update={updateAll.updateClientEmail} />
+            <CredentialKey description="private key" value={privateKey} update={updateAll.updatePrivateKey} />
         </div>
     )
 }
 
 interface CredentialKeyProps {
     description: string
-    key?: string
+    value: string
+    update: (key: string) => void
 }
 
-const CredentialKey = ({description, key}: CredentialKeyProps) => {
+const CredentialKey = ({ description, value, update }: CredentialKeyProps) => {
     const isOpenBrowserFileDialog = useRef<boolean>(false)
-    
+
     const handleFileSelected = (result) => {
         console.log('result.filePath.toString()', result.filePath.toString())
     }
 
+    const updateCredential = (event) => {
+        console.log('value event', event)
+        update(event.target.value)
+    }
+
     const openDialog = async () => {
-        const homeDir = `${window.api.os.homeDir}/Desktop`        
+        const homeDir = `${window.api.os.homeDir}/Desktop`
         const dialogConfig = {
             message: 'Aqui tem uma mensagem dinâmica',
-            defaultPath: window.api.path.join(homeDir), 
+            defaultPath: window.api.path.join(homeDir),
             title: `Selecionar um caminho para salvar o arquivo`,
             buttonLabel: 'Salvar',
             properties: ['openFile'],
@@ -64,7 +75,7 @@ const CredentialKey = ({description, key}: CredentialKeyProps) => {
             ]
         };
 
-        console.log('isOpenBrowserFileDialog',isOpenBrowserFileDialog)
+        console.log('isOpenBrowserFileDialog', isOpenBrowserFileDialog)
 
         if (isOpenBrowserFileDialog.current) {
             console.log('NAO PODE ABRIR')
@@ -87,21 +98,27 @@ const CredentialKey = ({description, key}: CredentialKeyProps) => {
             }).catch(error => {
                 console.log(error)
             })
-
         }
     }
 
+    // useEffect(() => {
+    //     const openFile = async () => {
+    //         console.log('opening file through useEffect')
+    //         const filePath = await window.api.openFile()
+    //         console.log('filePath result works', filePath)
+    //     }
+
+    //     openFile()
+    // }, [])
+
     return (
         <>
-            {key ? (
-                <div>
-                    {description}: {key}
-                </div>
-            ) : (
-                <div onClick={openDialog}>
-                    + {description}
-                </div>
-            )}
+            <div>{description} </div>
+            <input
+                type="text"
+                defaultValue={value}
+                onChange={updateCredential}
+            />
         </>
     )
 }

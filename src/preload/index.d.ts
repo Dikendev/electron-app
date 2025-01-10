@@ -4,7 +4,7 @@ import fs from 'fs'
 declare global {
   interface Window {
     electron: ElectronAPI
-    api: { 
+    api: {
       os: {
         platform: string
         type: string
@@ -14,7 +14,12 @@ declare global {
       fs: fs,
       path: path,
       dirname: () => string,
-      receive: (channel, func) => any
+      receive: (channel, func) => any,
+
+      // Preciso informar usando ts
+      openFile: () => Promise<string>,
+      savePreference: (key: string, value: unknown) => void,
+      loadPreferences: () => any
     }
   }
 }

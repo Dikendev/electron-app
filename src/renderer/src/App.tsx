@@ -4,7 +4,7 @@ import keyboard from './assets/keyboard.svg'
 import Actions from './components/Actions'
 import Clock from './components/Clock'
 import ShortCuts from './components/Shortcuts'
-import Status from './components/Status'
+import Status, { CredentialsInfo, UpdateAll } from './components/Status'
 import Versions from './components/Versions'
 import Loading, { LoadingStatus } from './components/Loading'
 
@@ -12,15 +12,62 @@ const App = (): JSX.Element => {
     const [isOpen, setIsOpen] = useState(false)
     const [credentialStatus, setCredentialStatus] = useState<boolean>(true)
 
+    const [credentials, setCredentials] = useState<CredentialsInfo>({
+        id: '123',
+        clientEmail: "diken.dev@gmai.com",
+        privateKey: 'private'
+    })
+
+    useEffect(() => {
+        const read = async () => {
+            console.log("LOAIDNGGGGG", await window.api.loadPreferences())
+        }
+
+        const { } = read()
+    }, [])
+
+    const updateId = (id: string) => {
+        window.api.savePreference('id', id)
+
+        setCredentials((prev) => ({
+            ...prev,
+            id
+        }))
+    }
+
+    const updateClientEmail = (clientEmail: string) => {
+        window.api.savePreference('client_email', clientEmail)
+
+        setCredentials((prev) => ({
+            ...prev,
+            clientEmail
+        }))
+    }
+
+    const updatePrivateKey = (privateKey: string) => {
+        window.api.savePreference('private_key', privateKey)
+
+        setCredentials((prev) => ({
+            ...prev,
+            privateKey
+        }))
+    }
+
+    const updateAll: UpdateAll = {
+        updateId,
+        updateClientEmail,
+        updatePrivateKey
+    }
+
     const [requestStatus, setRequestStatus] = useState<LoadingStatus>('idle')
 
     useEffect(() => {
-       setTimeout(() => {
-        console.log('?????????')
-        window.api.receive("fromMain", (response) => {
-            console.log("Received response from main process", response)
-        })
-       }, 5000)
+        setTimeout(() => {
+            console.log('?????????')
+            window.api.receive("fromMain", (response) => {
+                console.log("Received response from main process", response)
+            })
+        }, 5000)
         // quando iniciar a aplicação verificar o status.
         // sempre quando acontecer uma modificação na planilha atualizar os status das credenciais.
     }, [])
@@ -63,7 +110,11 @@ const App = (): JSX.Element => {
 
         <img alt="logo" className="logo" src={ia} />
 
-        <Status credentialStatus={credentialStatus} />
+        <Status
+            credentialStatus={credentialStatus}
+            credentials={credentials}
+            updateAll={updateAll}
+        />
 
         <div className="creator">automatizando processos</div>
         <div className="creator">Powered by Consistem</div>
@@ -73,7 +124,7 @@ const App = (): JSX.Element => {
         </div>
 
         <Clock />
-        
+
         <p className="tip">
             {/* Please try pressing <code>F12</code> to open the devTool */}
             Aqui pode ter uma explicação do app
