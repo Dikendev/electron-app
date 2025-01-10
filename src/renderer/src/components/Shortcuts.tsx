@@ -1,4 +1,3 @@
-
 interface ShortCutsProps {
   isOpen: boolean
 }

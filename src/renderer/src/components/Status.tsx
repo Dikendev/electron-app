@@ -19,6 +19,7 @@ const Status = ({ credentialStatus }: StatusProps) => {
 
       <div className="green"></div>
       <div className="status_item">internet</div>
+
       <Credentials id="fake1345" clientEmail="fake1345diego@sheets@gmail.com" privateKey="fake13452asadwff" />
     </div>
   )
