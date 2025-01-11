@@ -1,9 +1,9 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import gear from '../assets/gear.svg'
 import { UpdateAll } from './Status'
-import { CredentialInfo } from '../types/credential-info.interface'
+import { CredentialsInfo } from '../../../types/credentials-info.interface'
 
-interface CredentialsProps extends CredentialInfo {
+interface CredentialsProps extends CredentialsInfo {
     updateAll: UpdateAll
 }
 
@@ -16,7 +16,6 @@ const Credentials = ({
     const [isOpen, setIsOpen] = useState<boolean>(false)
 
     const openClose = () => {
-        console.log('?')
         setIsOpen((prev) => !prev)
     }
 
@@ -34,14 +33,65 @@ const Credentials = ({
     )
 }
 
+type CredentialSendStatus = 'none' | 'idle' | 'success' | 'failure'
+
 const CredentialsModal = ({ privateKey, clientEmail, id, updateAll }: CredentialsProps) => {
+    const [credentialSendStatus, setCredentialSendStatus] = useState<CredentialSendStatus>('none')
+
+    const saveCredentials = () => {
+        setCredentialSendStatus('idle')
+
+        try {
+            window.api.savePreference('credentials', {
+                id: id,
+                clientEmail: clientEmail,
+                privateKey: privateKey
+            })
+            setCredentialSendStatus('success')
+        } catch (error) {
+            setCredentialSendStatus('failure')
+        }
+    }
+
+    useEffect(() => {
+        const timeInMs = 2000
+        if (credentialSendStatus === 'success') {
+            setTimeout(() => {
+                setCredentialSendStatus('none')
+            }, timeInMs)
+        }
+    }, [credentialSendStatus])
+
     return (
         <div>
             <CredentialKey description="id" value={id} update={updateAll.updateId} />
             <CredentialKey description="client email" value={clientEmail} update={updateAll.updateClientEmail} />
             <CredentialKey description="private key" value={privateKey} update={updateAll.updatePrivateKey} />
+            <button onClick={saveCredentials}>Salvar</button>
+            <CredentialStatus credentialSendStatus={credentialSendStatus} />
         </div>
     )
+}
+
+interface CredentialStatusProps {
+    credentialSendStatus: CredentialSendStatus
+}
+
+const CredentialStatus = (credentialSendStatus: CredentialStatusProps): JSX.Element => {
+    switch (credentialSendStatus.credentialSendStatus) {
+        case 'none': {
+            return (<></>)
+        }
+        case 'idle': {
+            return (<>Carregando</>)
+        }
+        case 'success': {
+            return (<>Salvo com successo</>)
+        }
+        default: {
+            return (<><p>Algo deu errado</p></>)
+        }
+    }
 }
 
 interface CredentialKeyProps {
