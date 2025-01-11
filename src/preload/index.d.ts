@@ -1,4 +1,5 @@
 import { ElectronAPI } from '@electron-toolkit/preload'
+import { IStore } from '../main/classes/store'
 import fs from 'fs'
 
 declare global {
@@ -15,11 +16,9 @@ declare global {
       path: path,
       dirname: () => string,
       receive: (channel, func) => any,
-
-      // Preciso informar usando ts
       openFile: () => Promise<string>,
       savePreference: (key: string, value: unknown) => void,
-      loadPreferences: () => any
+      loadPreferences: <T>() => Promise<IStore | T>
     }
   }
 }

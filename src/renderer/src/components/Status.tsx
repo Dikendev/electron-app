@@ -1,9 +1,10 @@
-import { CredentialInfo } from "../types/credential-info.interface"
+
+import { CredentialsInfo } from "../../../types/credentials-info.interface"
 import Credentials from "./Credentials"
 
 interface StatusProps {
     credentialStatus: boolean
-    credentials: CredentialInfo
+    credentials: CredentialsInfo
     updateAll: UpdateAll
 }
 
@@ -14,7 +15,6 @@ export interface UpdateAll {
 }
 
 const Status = ({ credentialStatus, credentials, updateAll }: StatusProps) => {
-    console.log('credentials?/', credentials)
     return (
         <div className="status">
             {credentialStatus ? (

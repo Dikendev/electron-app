@@ -4,6 +4,8 @@ import os from 'os'
 import fs from 'fs'
 import path from 'path'
 
+import { IStore } from '../types/store.interface'
+
 // Custom APIs for renderer
 const api = {
   os: {
@@ -39,9 +41,12 @@ const api = {
   // mesmo entry point utilizado no renderer, agora posso utilizar na view
   // e vai retornar com o método de two-way
   openFile: () => ipcRenderer.invoke('dialog:openFile'),
+
+  //save the user preference
   savePreference: (key: string, value: string) => ipcRenderer.invoke('save-preferences', key, value),
 
-  loadPreferences: () => ipcRenderer.invoke("load-preferences")
+  //load all the config by user saved on app default src
+  loadPreferences: <T>(): Promise<IStore | T> => ipcRenderer.invoke("load-preferences")
 }
 
 // Use `contextBridge` APIs to expose Electron APIs to

@@ -1,10 +1,6 @@
 import fs from 'fs'
 import path from 'path';
-import { UserPreferences } from '..';
-
-interface DefaultConfig {
-    windowBounds: { width: number, height: number }
-}
+import { DefaultConfig, IStore } from '../../types/store.interface'
 
 class Store {
     configPath: string = ""
@@ -18,7 +14,7 @@ class Store {
         this.configPath = path.join(app.getPath('userData'), 'config.json')
     }
 
-    loadConfig(): Partial<UserPreferences> {
+    loadConfig<T>(): Promise<IStore | T> {
         try {
             if (fs.existsSync(this.configPath)) {
                 const data = fs.readFileSync(this.configPath, 'utf-8')
@@ -27,17 +23,17 @@ class Store {
             return {
                 configPath: this.configPath,
                 defaultConfig: this.defaultConfig
-            }
+            } as unknown as Promise<IStore | T>
         } catch (error) {
             console.error('Failed to load config', error)
             return {
                 configPath: this.configPath,
                 defaultConfig: this.defaultConfig
-            }
+            } as unknown as Promise<IStore | T>
         }
     }
 
-    saveConfig(config: DefaultConfig) {
+    saveConfig<T>(config: T) {
         try {
             fs.writeFileSync(this.configPath, JSON.stringify(config, null, 2), 'utf-8')
         } catch (error) {
