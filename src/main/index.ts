@@ -3,29 +3,25 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { join } from 'path'
 import { HandleFiles, IconHandle, Store, TrayManager } from './classes'
-
-export interface UserPreferences {
-    configPath: string,
-    defaultConfig: {
-        windowBounds: {
-            width: number, height: number
-        }
-    },
-    windowBounds: {
-        width: number, height: number
-    }
-}
+import { UserPreferences } from '../types/user-preferences'
+import { IStore } from '../types/store.interface'
 
 const userConfig = new Store(app)
 
-function createWindow(): void {
-    const { width, height } = userConfig.loadConfig().windowBounds
+async function createWindow(): Promise<void> {
+    const windowBounds = await userConfig.loadConfig<UserPreferences>()
 
+    let windowConfig: {
+        width: number, height: number
+    } = windowBounds.defaultConfig.windowBounds
 
+    if ('windowBounds' in windowBounds) {
+        windowConfig = windowBounds.windowBounds
+    }
 
     const mainWindow = new BrowserWindow({
-        width,
-        height,
+        width: windowConfig.width,
+        height: windowConfig.height,
         show: false,
         autoHideMenuBar: true,
         ...(process.platform === 'linux' ? { icon } : {}),
@@ -84,7 +80,7 @@ function createWindow(): void {
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
     const filesManager = new HandleFiles(dialog)
 
     // Set app user model id for windows
@@ -123,18 +119,18 @@ app.whenReady().then(() => {
     ipcMain.handle('dialog:openFile', filesManager.openFile)
 
     // Save user preference
-    ipcMain.handle('save-preferences', (event, key, value) => {
+    ipcMain.handle('save-preferences', (event, key, value): void => {
         // parar para entender isso aqi
-        const configLocal = userConfig.loadConfig()
+        const configLocal = userConfig.loadConfig<UserPreferences>()
         configLocal[key] = value
         userConfig.saveConfig(configLocal)
     })
 
-    ipcMain.handle('load-preferences', (event): UserPreferences => {
-        return userConfig.loadConfig()
+    ipcMain.handle('load-preferences', <T>(event): Promise<IStore | T> => {
+        return userConfig.loadConfig<T>()
     })
 
-    createWindow()
+    await createWindow()
 
     app.on('activate', () => {
         // On macOS it's common to re-create a window in the app when the

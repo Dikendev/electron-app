@@ -4,9 +4,12 @@ import keyboard from './assets/keyboard.svg'
 import Actions from './components/Actions'
 import Clock from './components/Clock'
 import ShortCuts from './components/Shortcuts'
-import Status, { CredentialsInfo, UpdateAll } from './components/Status'
 import Versions from './components/Versions'
 import Loading, { LoadingStatus } from './components/Loading'
+import Status, { UpdateAll } from './components/Status'
+import { UserPreferences } from '../../types/user-preferences'
+import { IStore } from '../../types/store.interface'
+import { CredentialsInfo } from '../../types/credentials-info.interface'
 
 const App = (): JSX.Element => {
     const [isOpen, setIsOpen] = useState(false)
@@ -19,16 +22,23 @@ const App = (): JSX.Element => {
     })
 
     useEffect(() => {
-        const read = async () => {
-            console.log("LOAIDNGGGGG", await window.api.loadPreferences())
+        const read = async (): Promise<UserPreferences | IStore> => {
+            return await window.api.loadPreferences<UserPreferences>()
         }
 
-        const { } = read()
+        read().then((result) => {
+            if ('credentials' in result) {
+                setCredentials((prev) => ({
+                    ...prev,
+                    ...result.credentials
+                }))
+            }
+        }).catch((error) => {
+            console.error(error)
+        })
     }, [])
 
     const updateId = (id: string) => {
-        window.api.savePreference('id', id)
-
         setCredentials((prev) => ({
             ...prev,
             id
@@ -36,8 +46,6 @@ const App = (): JSX.Element => {
     }
 
     const updateClientEmail = (clientEmail: string) => {
-        window.api.savePreference('client_email', clientEmail)
-
         setCredentials((prev) => ({
             ...prev,
             clientEmail
@@ -45,8 +53,6 @@ const App = (): JSX.Element => {
     }
 
     const updatePrivateKey = (privateKey: string) => {
-        window.api.savePreference('private_key', privateKey)
-
         setCredentials((prev) => ({
             ...prev,
             privateKey
