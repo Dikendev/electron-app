@@ -4,12 +4,15 @@ interface WorkingTimes {
 
 const WorkingTimes = ({ workingTimesTotal }: WorkingTimes) => {
     return (
-        <p>
+        <>
             {workingTimesTotal.length === 0 ? (
-                <>Carregando</>
-            ) : (<>Total de horas mês: {workingTimesTotal} </>)
-            }
-        </p>
+                <></>
+            ) : (
+                (<p className="tip">
+                    Total de horas mês: <span className="react">{workingTimesTotal}</span>
+                </p>)
+            )}
+        </>
     )
 }
 
