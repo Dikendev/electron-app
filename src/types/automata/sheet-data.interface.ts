@@ -31,7 +31,6 @@ interface WorkingTimes {
     workingTimeTotal: string
 }
 
-
 interface UpdateAll {
     updateId: (id: string) => void
     updateClientEmail: (clientEmail: string) => void;
