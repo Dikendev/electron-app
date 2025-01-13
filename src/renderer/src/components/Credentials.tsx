@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import gear from '../assets/gear.svg'
-import { UpdateAll } from './Status'
 import { CredentialsInfo } from '../../../types/credentials-info.interface'
+import { UpdateAll } from '../../../types/automata/sheet-data.interface'
 
 interface CredentialsProps extends CredentialsInfo {
     updateAll: UpdateAll
@@ -32,8 +32,8 @@ const Credentials = ({
                 onClick={openClose}
             />
 
-            {isOpen ? (<>
-                <div style={{ position: 'absolute', bottom: '-12rem', left: '-10rem' }}>
+            {isOpen ?
+                (<div style={{ position: 'absolute', bottom: '-12rem', left: '-10rem' }}>
                     <CredentialsModal
                         id={id}
                         privateKey={privateKey}
@@ -41,7 +41,7 @@ const Credentials = ({
                         updateAll={updateAll}
                     />
                 </div>
-            </>) : null
+                ) : null
             }
         </div>
     )
