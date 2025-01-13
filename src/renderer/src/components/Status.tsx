@@ -1,36 +1,26 @@
-
+import AppStatus from "../../../types/app-status.interface"
+import { UpdateAll } from "../../../types/automata/sheet-data.interface"
 import { CredentialsInfo } from "../../../types/credentials-info.interface"
 import Credentials from "./Credentials"
 
 interface StatusProps {
-    credentialStatus: boolean
+    appStatus: AppStatus
     credentials: CredentialsInfo
     updateAll: UpdateAll
 }
 
-export interface UpdateAll {
-    updateId: (id: string) => void
-    updateClientEmail: (clientEmail: string) => void;
-    updatePrivateKey: (privateKey: string) => void;
-}
-
-const Status = ({ credentialStatus, credentials, updateAll }: StatusProps) => {
+const Status = ({ appStatus, credentials, updateAll }: StatusProps) => {
     return (
         <div className="status">
-            {credentialStatus ? (
-                <>
-                    <div className="green"></div>
-                </>
-            ) : (
-                <>
-                    <div className="red"></div>
-                </>
-            )}
+            <InfoStatus
+                appStatus={appStatus.credential}
+                description="Credenciais"
+            />
 
-            <div className="status_item"> credenciais</div>
-
-            <div className="green"></div>
-            <div className="status_item">internet</div>
+            <InfoStatus
+                appStatus={appStatus.internet}
+                description="Internet"
+            />
 
             <Credentials
                 id={credentials.id}
@@ -39,6 +29,20 @@ const Status = ({ credentialStatus, credentials, updateAll }: StatusProps) => {
                 updateAll={updateAll}
             />
         </div>
+    )
+}
+
+interface InfoStatusProps {
+    appStatus: boolean
+    description: string
+}
+
+const InfoStatus = ({ appStatus, description }: InfoStatusProps) => {
+    return (
+        <>
+            <div className={`${appStatus ? "green" : "red"}`}></div>
+            <div className="status_item">{description}</div>
+        </>
     )
 }
 
