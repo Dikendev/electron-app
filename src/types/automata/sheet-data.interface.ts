@@ -1,12 +1,12 @@
 type TodaysRow = number
 
-type existOrNot = string | null
+type ExistOrNot = string | null
 
 interface SheetCellContentFilled {
-    startWorkingHours: existOrNot,
-    startLunch: existOrNot,
-    finishLunch: existOrNot,
-    finishWorkingHours: existOrNot
+    startWorkingHours: ExistOrNot,
+    startLunch: ExistOrNot,
+    finishLunch: ExistOrNot,
+    finishWorkingHours: ExistOrNot
 }
 
 interface SheetDataCellContent {
@@ -31,4 +31,18 @@ interface WorkingTimes {
     workingTimeTotal: string
 }
 
-export type { SheetData, SheetCellContentFilled, WorkingTimes }
+
+interface UpdateAll {
+    updateId: (id: string) => void
+    updateClientEmail: (clientEmail: string) => void;
+    updatePrivateKey: (privateKey: string) => void;
+    checkOnUpdate: () => Promise<void>
+}
+
+export type {
+    ExistOrNot,
+    SheetData,
+    SheetCellContentFilled,
+    WorkingTimes,
+    UpdateAll
+}
