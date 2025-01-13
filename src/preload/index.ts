@@ -5,6 +5,9 @@ import fs from 'fs'
 import path from 'path'
 
 import { IStore } from '../types/store.interface'
+import { GoogleSpreadsheetWorksheet } from 'google-spreadsheet'
+import { AvailableCommands } from '../types/automata'
+import { TodaySheetTimesResult, WorkingTimesResult } from '../types/automata/automata-result.interface'
 
 // Custom APIs for renderer
 const api = {
@@ -46,7 +49,12 @@ const api = {
   savePreference: (key: string, value: string) => ipcRenderer.invoke('save-preferences', key, value),
 
   //load all the config by user saved on app default src
-  loadPreferences: <T>(): Promise<IStore | T> => ipcRenderer.invoke("load-preferences")
+  loadPreferences: <T>(): Promise<IStore | T> => ipcRenderer.invoke("load-preferences"),
+  iniGoogleAuth: (option: AvailableCommands): Promise<GoogleSpreadsheetWorksheet> => ipcRenderer.invoke("init-google-auth", option),
+  executeWorkAutomate: (option: AvailableCommands): Promise<void> => ipcRenderer.invoke('execute-work-automate', option),
+  executeGetWorkTimes: (): Promise<WorkingTimesResult> => ipcRenderer.invoke('execute-get-work-times'),
+  getTodaySheetTimes: (): Promise<TodaySheetTimesResult> => ipcRenderer.invoke('get-today-sheet-values'),
+  internetPing: (): Promise<boolean> => ipcRenderer.invoke('internet-ping')
 }
 
 // Use `contextBridge` APIs to expose Electron APIs to
