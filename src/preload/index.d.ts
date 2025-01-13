@@ -1,6 +1,9 @@
 import { ElectronAPI } from '@electron-toolkit/preload'
-import { IStore } from '../main/classes/store'
 import fs from 'fs'
+import { IStore } from '../main/classes/store'
+import { GoogleSpreadsheetWorksheet } from 'google-spreadsheet'
+import { AvailableCommands } from '../types/automata'
+import { TodaySheetTimesResult, WorkingTimesResult } from '../types/automata/automata-result.interface'
 
 declare global {
   interface Window {
@@ -18,7 +21,12 @@ declare global {
       receive: (channel, func) => any,
       openFile: () => Promise<string>,
       savePreference: (key: string, value: unknown) => void,
-      loadPreferences: <T>() => Promise<IStore | T>
+      loadPreferences: <T>() => Promise<IStore | T>,
+      executeWorkAutomate: (option: AvailableCommands
+      ) => Promise<void>,
+      executeGetWorkTimes: () => Promise<WorkingTimesResult>,
+      getTodaySheetTimes: () => Promise<TodaySheetTimesResult>,
+      internetPing: () => Promise<boolean>
     }
   }
 }
