@@ -1,6 +1,10 @@
 import { useState } from 'react'
 
-function Versions(): JSX.Element {
+interface VersionsProps {
+  idSheet?: string
+}
+
+function Versions({ idSheet }: VersionsProps): JSX.Element {
   const [versions] = useState(window.electron.process.versions)
 
   return (
@@ -13,6 +17,13 @@ function Versions(): JSX.Element {
           Como usar
         </a>
       </li>
+      {idSheet && idSheet.length ? (
+        <li className="help-link">
+          <a href={`https://docs.google.com/spreadsheets/d/${idSheet}/`} target="_blank" rel="noreferrer">
+            Abrir a planilha
+          </a>
+        </li>
+      ) : (null)}
     </ul>
   )
 }
