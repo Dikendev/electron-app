@@ -12,7 +12,7 @@ const Credentials = ({
     clientEmail,
     id,
     updateAll
-}: CredentialsProps) => {
+}: CredentialsProps): JSX.Element => {
     const [isOpen, setIsOpen] = useState<boolean>(false)
 
     const openClose = () => {
@@ -21,11 +21,25 @@ const Credentials = ({
 
     return (
         <div style={{ display: 'flex', position: 'relative' }}>
-            <img style={{ color: 'white', marginBottom: '0px' }} alt="config" className="shortcut_button" src={gear} onClick={openClose} />
+            <img
+                style={{
+                    color: 'white',
+                    marginBottom: '0px'
+                }}
+                className="shortcut_button"
+                src={gear}
+                alt="config"
+                onClick={openClose}
+            />
 
             {isOpen ? (<>
-                <div style={{ position: 'absolute', bottom: '-10.5rem', left: '-10rem' }}>
-                    <CredentialsModal privateKey={privateKey} clientEmail={clientEmail} id={id} updateAll={updateAll} />
+                <div style={{ position: 'absolute', bottom: '-12rem', left: '-10rem' }}>
+                    <CredentialsModal
+                        id={id}
+                        privateKey={privateKey}
+                        clientEmail={clientEmail}
+                        updateAll={updateAll}
+                    />
                 </div>
             </>) : null
             }
@@ -38,7 +52,7 @@ type CredentialSendStatus = 'none' | 'idle' | 'success' | 'failure'
 const CredentialsModal = ({ privateKey, clientEmail, id, updateAll }: CredentialsProps) => {
     const [credentialSendStatus, setCredentialSendStatus] = useState<CredentialSendStatus>('none')
 
-    const saveCredentials = () => {
+    const saveCredentials = async () => {
         setCredentialSendStatus('idle')
 
         try {
@@ -47,6 +61,7 @@ const CredentialsModal = ({ privateKey, clientEmail, id, updateAll }: Credential
                 clientEmail: clientEmail,
                 privateKey: privateKey
             })
+            await updateAll.checkOnUpdate()
             setCredentialSendStatus('success')
         } catch (error) {
             setCredentialSendStatus('failure')
