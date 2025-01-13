@@ -11,17 +11,13 @@ const Loading = ({ status }: LoadingProps) => {
         <div style={{ height: '2rem' }}>Loading</div>
       </>)
     }
-    case 'error': {
-      return (<>
-        <div style={{ height: '2rem' }}>Error</div>
-      </>)
-    }
     case 'success': {
       return (<>
         <div style={{ height: '2rem' }}>Sucesso</div>
       </>)
     }
-    case 'idle': {
+    case 'idle':
+    default: {
       return (<div style={{ height: '2rem' }}></div>)
     }
   }
