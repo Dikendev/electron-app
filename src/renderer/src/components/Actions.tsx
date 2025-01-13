@@ -1,6 +1,7 @@
 import AppStatus from "../../../types/app-status.interface"
 import { AvailableCommands, SheetCellContentFilled } from "../../../types/automata"
 import { ExistOrNot } from "../../../types/automata/sheet-data.interface"
+import Tooltip from "./Tooltip"
 
 interface ActionsProps {
     appStatus: AppStatus
@@ -21,21 +22,18 @@ const Actions = ({
                 description="Início do expediente"
                 onClick={() => onClickAction('INICIO_EXP')}
             />
-
             <ActionStatus
                 appStatus={appStatus.credential}
                 sheetValue={sheetValues.startLunch}
                 description="Início do almoço"
                 onClick={() => onClickAction('INICIO_ALM')}
             />
-
             <ActionStatus
                 appStatus={appStatus.credential}
                 sheetValue={sheetValues.finishLunch}
                 description="Fim do almoço"
                 onClick={() => onClickAction('FIM_ALM')}
             />
-
             <ActionStatus
                 appStatus={appStatus.credential}
                 sheetValue={sheetValues.finishWorkingHours}
@@ -50,7 +48,7 @@ interface ActionStatusProps {
     appStatus: boolean
     sheetValue: ExistOrNot
     description: string
-    onClick: (action: AvailableCommands) => void
+    onClick: () => void
 }
 
 const ActionStatus = ({
@@ -63,7 +61,7 @@ const ActionStatus = ({
         <div
             style={{ position: 'relative' }}
             className={appStatus ? 'action' : 'action disabled'}
-            onClick={() => onClick}>
+            onClick={() => onClick()}>
             <a>{description}</a>
             <SheetValues sheetValues={sheetValue} />
         </div>
@@ -86,7 +84,13 @@ const SheetValues = ({ sheetValues }: SheetValuesProp): JSX.Element => {
                 textAlign: "center",
                 borderRadius: "0.3rem"
             }}>
-            {sheetValues ? <p className="tip">{sheetValues}</p> : '-'}
+            {sheetValues ? (
+                <Tooltip
+                    className="tip"
+                    description={sheetValues}
+                    tooltip="Horário registrado"
+                />
+            ) : ('-')}
         </code>
     )
 }
