@@ -1,18 +1,29 @@
-# electron-app
+# WorkTime Automator
 
-This app aims to automate sheet management from Nova Coop, used internally at Consistem. It is an Electron application built with TypeScript and integrates Google authentication to facilitate easy updates without manual intervention.
+  <br/>
 
-The requirement to this app work is:
+I developed an Electron application to streamline working with spreadsheets. This app simplifies the process of adding and managing values, making it more efficient and user-friendly. By automating repetitive tasks, it saves time and reduces errors, providing a seamless experience for handling spreadsheet data.
 
-  1. The sheet must exist with the correct title in the month and year format (MMM/YYYY).
+  <br/>
 
-  2. All the days, starting from **/25 to **/25.
+
+<img src="./resources/app_working.gif" alt="app example" /> 
+
+  <br/>
+
+# The requirement to this app work is:
+
+  1. The sheet must exist with the correct title in the month and year format (MMM/YY).
+
+  2. Days column format as DD/MM
 
   3. The header must be exactly as demonstrated above:
     - DIAS
     - HORÁRIO INÍCIO
     - HORÁRIO DE TÉRMINO
     - HORAS TRABALHADAS
+
+<img width="800" src="./resources/sheet_example.png" alt="sheet example" /> 
 
 <!-- ### Build
 
@@ -39,7 +50,7 @@ $ npm run build:linux
   <br/>
 
 
-<img src="./resources/first_step.gif" alt="dikendev" /> 
+<img src="./resources/first_step.gif" alt="first step" /> 
 
 ### Step 3: Create a Service Account
 
@@ -49,8 +60,7 @@ $ npm run build:linux
 
   <br/>
 
-
-<img src="./resources/second_step.gif" alt="dikendev" /> 
+<img src="./resources/second_step.gif" alt="second step" /> 
 
   <br/>
 
@@ -58,7 +68,7 @@ $ npm run build:linux
     
   <br/>
 
-<img src="./resources/third_step.gif" alt="dikendev" /> 
+<img src="./resources/third_step.gif" alt="third step" /> 
 
 ### Step 4: Generate Access Key
 
@@ -69,7 +79,7 @@ $ npm run build:linux
 
   <br/>
 
-<img src="./resources/fourth_step.gif" alt="dikendev" /> 
+<img src="./resources/fourth_step.gif" alt="fourth step" /> 
 
   <br/>
 
@@ -82,8 +92,7 @@ $ npm run build:linux
 
   <br/>
 
-
-<img src="./resources/credential_app.gif" alt="dikendev" /> 
+<img src="./resources/credential_app.gif" alt="credential" /> 
 
   <br/>
 
@@ -93,7 +102,7 @@ $ npm run build:linux
   <br/>
 
 
-<img src="./resources/add_credential.svg" alt="dikendev" /> 
+<img src="./resources/add_credential.svg" alt="adding credential" /> 
   
   <br/>
 
@@ -101,7 +110,9 @@ $ npm run build:linux
 
   <br/>
 
-<img src="./resources/save_credential.gif" alt="dikendev" /> 
+<img src="./resources/save_credential.gif" alt="saving credential" />
+
+  <br/>
 
   5. If all steps are completed successfully, the view will enable the action buttons and display the total working time for the current month.
 
