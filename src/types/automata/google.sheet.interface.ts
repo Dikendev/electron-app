@@ -7,6 +7,7 @@ interface GoogleSheetCredentials {
 interface GoogleSheetAuthCredentials extends GoogleSheetCredentials {
     scopes: string[]
 }
+
 export type {
     GoogleSheetCredentials, GoogleSheetAuthCredentials
 }
