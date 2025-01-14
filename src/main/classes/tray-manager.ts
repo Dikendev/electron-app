@@ -32,7 +32,7 @@ class TrayManager {
         click: () => { console.log("Fim expediente") }
       },
       {
-        label: "Fechar do gerenciador",
+        label: "Sair do gerenciador",
         accelerator: process.platform === "darwin"
           ? CLOSE_APP.macOs
           : CLOSE_APP.winOs,
