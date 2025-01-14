@@ -25,7 +25,13 @@ I developed an Electron application to streamline working with spreadsheets. Thi
 
 <img width="800" src="./resources/sheet_example.png" alt="sheet example" /> 
 
-<!-- ### Build
+### How to run
+```bash
+$ npm run dev
+
+```
+
+### Build
 
 ```bash
 # For windows
@@ -36,7 +42,7 @@ $ npm run build:mac
 
 # For Linux
 $ npm run build:linux
-``` -->
+```
 
 ## How to Get Credentials Keys
 
