@@ -14,6 +14,8 @@ import { handleMessageFromRenderer } from './handle-message-from-renderer'
 
 const userConfig = new Store(app)
 
+let mainWindow: BrowserWindow
+
 async function createWindow(): Promise<void> {
     const windowBounds = await userConfig.loadConfig<UserPreferences>()
 
@@ -25,7 +27,7 @@ async function createWindow(): Promise<void> {
         windowConfig = windowBounds.windowBounds
     }
 
-    const mainWindow = new BrowserWindow({
+    mainWindow = new BrowserWindow({
         width: windowConfig.width,
         height: windowConfig.height,
         show: false,
@@ -100,12 +102,19 @@ app.whenReady().then(async () => {
     // })
 
     const tray: Tray = new Tray(iconPath)
-
     const contextMenu = Menu.buildFromTemplate(TrayManager.trayIconsInfo(app))
 
-    tray.setToolTip('Registrar horário')
+    tray.setToolTip('Registrar horários cooperativa')
     tray.setContextMenu(contextMenu)
-
+    // this is not working don't figure why
+    tray.on("right-click", () => {
+        console.log('right-click')
+    })
+    
+    tray.on("click", () => {
+        mainWindow.isVisible() ? mainWindow.minimize() : mainWindow.show()
+    })
+        
     // Default open or close DevTools by F12 in development
     // and ignore CommandOrControl + R in production.
     // see https://github.com/alex8088/electron-toolkit/tree/master/packages/utils
@@ -126,7 +135,6 @@ app.whenReady().then(async () => {
 
     // Save user preference
     ipcMain.handle('save-preferences', (event, key, value): void => {
-        // parar para entender isso aqi
         const configLocal = userConfig.loadConfig<UserPreferences>()
         configLocal[key] = value
         userConfig.saveConfig(configLocal)
@@ -178,21 +186,13 @@ async function getTodaySheetValues(): Promise<TodaySheetTimesResult> {
 }
 
 async function executeWorkAutomate(option: AvailableCommands): Promise<void> {
-    try {
-        const automata = await initAuth()
-        automata.execute(option)
-    } catch (error) {
-        throw error
-    }
+    const automata = await initAuth()
+    await automata.execute(option)
 }
 
 async function executeGetWorkTimes(): Promise<WorkingTimesResult> {
-    try {
-        const automata = await initAuth()
-        return automata.executeWorkingHours()
-    } catch (error) {
-        throw error
-    }
+    const automata = await initAuth()
+    return automata.executeWorkingHours()
 }
 
 async function initAuth(): Promise<InitAutomata> {
@@ -209,17 +209,12 @@ async function initAuth(): Promise<InitAutomata> {
         credentials = windowBounds.credentials
     }
 
-    try {
-        const googleSheetAuthCredentials = new GoogleSheetAuth({
-            id: credentials.id,
-            clientEmail: credentials.clientEmail,
-            privateKey: credentials.privateKey.replace(/\\n/g, '\n'),
-        })
+    const googleSheetAuthCredentials = new GoogleSheetAuth({
+        id: credentials.id,
+        clientEmail: credentials.clientEmail,
+        privateKey: credentials.privateKey.replace(/\\n/g, '\n'),
+    })
 
-        const sheet = await googleSheetAuthCredentials.loadSheet()
-        return new InitAutomata(sheet)
-    } catch (error) {
-        console.error(error)
-        throw error
-    }
+    const sheet = await googleSheetAuthCredentials.loadSheet()
+    return new InitAutomata(sheet)
 }
