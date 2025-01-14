@@ -19,8 +19,6 @@ import { UpdateAll } from '../../types/automata/sheet-data.interface'
 
 type AppStatusAction = "APP_UP" | "APP_DOWN" | "INTERNET_UP" | "INTERNET_DOWN"
 
-interface ReducerState extends AppStatus, CredentialsInfo { }
-
 const reducer = (state: AppStatus, action: { type: AppStatusAction }): AppStatus => {
     switch (action.type) {
         case "APP_UP": {
@@ -163,10 +161,10 @@ const App = (): JSX.Element => {
     }
 
     useEffect(() => {
-        window.api.internetPing().then((result) => {
+        window.api.internetPing().then(() => {
             dispatch({ type: "INTERNET_UP" })
 
-        }).catch((error) => {
+        }).catch(() => {
             dispatch({ type: "INTERNET_DOWN" })
         })
     }, [])
@@ -185,7 +183,7 @@ const App = (): JSX.Element => {
 
                 getWorkingTimes()
             }
-        }).catch((error) => {
+        }).catch(() => {
             setErrorSystemError()
         })
     }, [])
