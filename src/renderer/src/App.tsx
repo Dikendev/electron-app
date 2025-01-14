@@ -51,6 +51,13 @@ const reducer = (state: AppStatus, action: { type: AppStatusAction }): AppStatus
     }
 }
 
+const initialValuesFromSheet: SheetCellContentFilled = {
+    startWorkingHours: null,
+    startLunch: null,
+    finishLunch: null,
+    finishWorkingHours: null
+}
+
 const App = (): JSX.Element => {
     const [isOpen, setIsOpen] = useState(false)
     const [workingTimes, setWorkingTimes] = useState<string>("")
@@ -62,11 +69,12 @@ const App = (): JSX.Element => {
     })
 
     const [valuesFromSheet, setValuesFromSheet] = useState<SheetCellContentFilled>({
-        startWorkingHours: null,
-        startLunch: null,
-        finishLunch: null,
-        finishWorkingHours: null
+        ...initialValuesFromSheet
     })
+
+    const resetValuesFromSheet = () => {
+        setValuesFromSheet({...initialValuesFromSheet})
+    }
 
     const [appStatus, dispatch] = useReducer(reducer, {
         credential: false,
@@ -75,18 +83,12 @@ const App = (): JSX.Element => {
 
 
     const updateId = async (id: string) => {
-        console.log('chamou???')
-        
         setCredentials((prev) => ({
             ...prev,
             id
         }))
 
-        try {
-            await getWorkingTimes()
-        } catch (error) {
-            console.error(error)
-        }
+        await getWorkingTimes()
     }
 
     const updateClientEmail = (clientEmail: string) => {
@@ -107,25 +109,10 @@ const App = (): JSX.Element => {
         setIsOpen((prev) => !prev)
     }
 
-    const getWorkingTimes = async () => {
-        try {
-            const workingTimes = await window.api.executeGetWorkTimes()
-
-            if ('workingTimeTotal' in workingTimes) {
-                setWorkingTimes(workingTimes.workingTimeTotal)
-                setRequestStatus('success')
-                dispatch({ type: 'APP_UP' })
-            }
-
-        } catch (error) {
-            setRequestStatus('error')
-            dispatch({ type: 'APP_DOWN' })
-        }
-    }
-
+    
     const onClickAction = async (option: AvailableCommands) => {
         if (!appStatus.credential || !appStatus.internet) return
-
+        
         setRequestStatus('loading')
         try {
             await window.api.executeWorkAutomate(option)
@@ -133,18 +120,39 @@ const App = (): JSX.Element => {
             await updateValuesFromSheet()
             setRequestStatus('success')
         } catch (error) {
-            setRequestStatus('error')
-            dispatch({ type: 'APP_DOWN' })
+            setErrorSystemError()
         }
     }
+    
+    const getWorkingTimes = async () => {
+        try {
+            const workingTimes = await window.api.executeGetWorkTimes()
+            await updateValuesFromSheet()
+            console.log('workingTimes', workingTimes)
 
+            if ('workingTimeTotal' in workingTimes) {
+                setWorkingTimes(workingTimes.workingTimeTotal)
+                setRequestStatus('success')
+                dispatch({ type: 'APP_UP' })
+            }
+        } catch (error) {
+            setErrorSystemError()
+        }
+    }
+ 
     const updateValuesFromSheet = async () => {
         try {
             const valuesFromSheet = await window.api.getTodaySheetTimes()
             setValuesFromSheet((prev) => ({ ...prev, ...valuesFromSheet }))
         } catch (error) {
-            console.log('AQUI')
+            setErrorSystemError()
         }
+    }
+
+    const setErrorSystemError = () => {
+        resetValuesFromSheet()
+        setRequestStatus('error')
+        dispatch({ type: 'APP_DOWN' })
     }
 
     const updateAll: UpdateAll = {
@@ -155,15 +163,6 @@ const App = (): JSX.Element => {
     }
 
     useEffect(() => {
-        // const internetPing = async (): Promise<void> => {
-        //     try {
-        //         window.api.internetPing()
-        //     } catch (error) {
-        //         console.log('ERROR CATCH ?')
-        //         dispatch({ type: "INTERNET_DOWN" })
-        //     }
-        // }
-
         window.api.internetPing().then((result) => {
             dispatch({ type: "INTERNET_UP" })
 
@@ -177,30 +176,18 @@ const App = (): JSX.Element => {
             return await window.api.loadPreferences<UserPreferences>()
         }
 
-        try {
-            read().then((result) => {
-                if ('credentials' in result) {
-                    setCredentials((prev) => ({
-                        ...prev,
-                        ...result.credentials
-                    }))
+        read().then((result) => {
+            if ('credentials' in result) {
+                setCredentials((prev) => ({
+                    ...prev,
+                    ...result.credentials
+                }))
 
-                    getWorkingTimes().then((result) => {
-                        dispatch({ type: 'APP_UP' })
-
-                    }).catch((error) => {
-                        setRequestStatus('error')
-                        dispatch({ type: 'APP_DOWN' })
-                    })
-                }
-            }).catch((error) => {
-                console.error(error)
-                setRequestStatus('error')
-                dispatch({ type: 'APP_DOWN' })
-            })
-        } catch (error) {
-            console.log('CATCH', error)
-        }
+                getWorkingTimes()
+            }
+        }).catch((error) => {
+            setErrorSystemError()
+        })
     }, [])
 
     useEffect(() => {
@@ -228,9 +215,18 @@ const App = (): JSX.Element => {
         getWorkingTimes()
     }, [])
 
+
+    console.log('appStatus', appStatus)
+
     return (<>
         <div className="shortCuts_button">
-            <img style={{ color: 'white' }} alt="logo" className="shortcut_button" src={keyboard} onClick={openClose} />
+            <img 
+                style={{ color: 'white' }} 
+                alt="logo" 
+                className="shortcut_button" 
+                src={keyboard} 
+                onClick={openClose} 
+            />
         </div>
 
         <ShortCuts isOpen={isOpen} />
