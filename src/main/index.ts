@@ -5,6 +5,12 @@ import { join } from 'path'
 import { HandleFiles, IconHandle, Store, TrayManager } from './classes'
 import { UserPreferences } from '../types/user-preferences'
 import { IStore } from '../types/store.interface'
+import GoogleSheetAuth from './automata/automata/google-sheet-auth'
+import InitAutomata from './automata/automata/automata'
+import { AvailableCommands } from '../types/automata'
+import { TodaySheetTimesResult, WorkingTimesResult } from '../types/automata/automata-result.interface'
+import axios from 'axios'
+import { handleMessageFromRenderer } from './handle-message-from-renderer'
 
 const userConfig = new Store(app)
 
@@ -130,6 +136,19 @@ app.whenReady().then(async () => {
         return userConfig.loadConfig<T>()
     })
 
+    handleMessageFromRenderer('execute-work-automate', (
+        event,
+        option: AvailableCommands
+    ): Promise<void> => executeWorkAutomate(option))
+
+    handleMessageFromRenderer('execute-get-work-times', (
+        event,
+    ): Promise<WorkingTimesResult> => executeGetWorkTimes())
+
+    handleMessageFromRenderer('get-today-sheet-times', (event): Promise<TodaySheetTimesResult> => getTodaySheetValues())
+
+    handleMessageFromRenderer('internet-ping', (event): Promise<void> => internetPing())
+
     await createWindow()
 
     app.on('activate', () => {
@@ -147,3 +166,60 @@ app.on('window-all-closed', () => {
         app.quit()
     }
 })
+
+async function internetPing(): Promise<void> {
+    const google = "https://www.google.com.br"
+    await axios.get(google)
+}
+
+async function getTodaySheetValues(): Promise<TodaySheetTimesResult> {
+    const automata = await initAuth()
+    return automata.todayValues()
+}
+
+async function executeWorkAutomate(option: AvailableCommands): Promise<void> {
+    try {
+        const automata = await initAuth()
+        automata.execute(option)
+    } catch (error) {
+        throw error
+    }
+}
+
+async function executeGetWorkTimes(): Promise<WorkingTimesResult> {
+    try {
+        const automata = await initAuth()
+        return automata.executeWorkingHours()
+    } catch (error) {
+        throw error
+    }
+}
+
+async function initAuth(): Promise<InitAutomata> {
+    const windowBounds = await userConfig.loadConfig<UserPreferences>()
+    console.log('windowBounds', windowBounds)
+
+    let credentials: UserPreferences['credentials'] = {
+        id: "",
+        privateKey: "",
+        clientEmail: ""
+    }
+
+    if ('credentials' in windowBounds) {
+        credentials = windowBounds.credentials
+    }
+
+    try {
+        const googleSheetAuthCredentials = new GoogleSheetAuth({
+            id: credentials.id,
+            clientEmail: credentials.clientEmail,
+            privateKey: credentials.privateKey.replace(/\\n/g, '\n'),
+        })
+
+        const sheet = await googleSheetAuthCredentials.loadSheet()
+        return new InitAutomata(sheet)
+    } catch (error) {
+        console.error(error)
+        throw error
+    }
+}
