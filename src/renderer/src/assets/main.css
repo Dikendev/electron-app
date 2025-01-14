@@ -171,13 +171,25 @@ code {
 }
 
 .disabled a {
-  background-color: red 
+  background-color: rgb(165, 1, 1);
+}
+
+.disabled a:hover {
+  background-color: rgb(119, 0, 0) !important;
 }
 
 .action a:hover {
   border-color: var(--ev-button-alt-hover-border);
   color: var(--ev-button-alt-hover-text);
   background-color: var(--ev-button-alt-hover-bg);
+}
+
+.registered a {
+  background-color: rgb(18, 107, 0)
+}
+
+.registered a:hover {
+  background-color: rgb(15, 90, 0)
 }
 
 .help-link a {

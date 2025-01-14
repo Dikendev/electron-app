@@ -1,3 +1,4 @@
+import { useCallback } from "react"
 import AppStatus from "../../../types/app-status.interface"
 import { AvailableCommands, SheetCellContentFilled } from "../../../types/automata"
 import { ExistOrNot } from "../../../types/automata/sheet-data.interface"
@@ -57,10 +58,18 @@ const ActionStatus = ({
     description,
     onClick
 }: ActionStatusProps): JSX.Element => {
+    const buttonDescriptionClass = useCallback(() => {
+        return sheetValue ? 'registered' : ''
+    }, [description])
+
+    const appStatusStyle = useCallback(() => {
+        return  appStatus ? 'action' : 'action disabled'
+    }, [appStatus])
+
     return (
         <div
             style={{ position: 'relative' }}
-            className={appStatus ? 'action' : 'action disabled'}
+            className={`${buttonDescriptionClass()} ${appStatusStyle()}`}
             onClick={() => onClick()}>
             <a>{description}</a>
             <SheetValues sheetValues={sheetValue} />
