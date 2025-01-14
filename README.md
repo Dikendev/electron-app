@@ -1,26 +1,20 @@
 # electron-app
 
-An Electron application with React and TypeScript
+This app aims to automate sheet management from Nova Coop, used internally at Consistem. It is an Electron application built with TypeScript and integrates Google authentication to facilitate easy updates without manual intervention.
 
-## Recommended IDE Setup
+The requirement to this app work is:
 
-- [VSCode](https://code.visualstudio.com/) + [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) + [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode)
+  1. The sheet must exist with the correct title in the month and year format (MMM/YYYY).
 
-## Project Setup
+  2. All the days, starting from **/25 to **/25.
 
-### Install
+  3. The header must be exactly as demonstrated above:
+    - DIAS
+    - HORÁRIO INÍCIO
+    - HORÁRIO DE TÉRMINO
+    - HORAS TRABALHADAS
 
-```bash
-$ npm install
-```
-
-### Development
-
-```bash
-$ npm run dev
-```
-
-### Build
+<!-- ### Build
 
 ```bash
 # For windows
@@ -31,7 +25,7 @@ $ npm run build:mac
 
 # For Linux
 $ npm run build:linux
-```
+``` -->
 
 ## How to Get Credentials Keys
 
@@ -40,34 +34,77 @@ $ npm run build:linux
 
 
 ### Step 2: Navigate to APIs & Services
+  1. Click on **APIs & Services** in the left-hand menu.
+  
+  <br/>
 
-1. Click on **APIs & Services** in the left-hand menu.
 
 <img src="./resources/first_step.gif" alt="dikendev" /> 
 
 ### Step 3: Create a Service Account
 
-1. Go to **Credentials**
-2. Click on **Manage service accounts**
-3. Click **Create Service Account**
+  1. Go to **Credentials**
+  2. Click on **Manage service accounts**
+  3. Click **Create Service Account**
+
+  <br/>
+
 
 <img src="./resources/second_step.gif" alt="dikendev" /> 
 
+  <br/>
 
-4. Enter a description, assing the **Owner** role, then **Continue** and **Done**
+  4. Enter a description, assing the **Owner** role, then **Continue** and **Done**
+    
+  <br/>
 
 <img src="./resources/third_step.gif" alt="dikendev" /> 
 
 ### Step 4: Generate Access Key
 
-1. Locate the newly created service account.
-2. Click **Actions** > **Manage keys**
-3. Click **Add Key** > **Create new Key**
-4. Select **JSON** and click **Create**
+  1. Locate the newly created service account.
+  2. Click **Actions** > **Manage keys**
+  3. Click **Add Key** > **Create new Key**
+  4. Select **JSON** and click **Create**
+
+  <br/>
 
 <img src="./resources/fourth_step.gif" alt="dikendev" /> 
 
-5. The JSON key file will be downloaded to your computer. Store it securely.
+  <br/>
 
-###
+  5. The JSON key file will be downloaded to your computer. Store it securely.
+ 
+### Step 5: Add the credentials to APP
+
+  1. Open the app
+  2. Click on **Config**
+
+  <br/>
+
+
+<img src="./resources/credential_app.gif" alt="dikendev" /> 
+
+  <br/>
+
+  3. The client email and private key are located in the previously downloaded JSON file from Google. (Use the values without the quotation marks.)
+  4. The ID is located in the Google Sheet URL after the d/ and before the next /.
+  
+  <br/>
+
+
+<img src="./resources/add_credential.svg" alt="dikendev" /> 
+  
+  <br/>
+
+  4. Click on **save**
+
+  <br/>
+
+<img src="./resources/save_credential.gif" alt="dikendev" /> 
+
+  5. If all steps are completed successfully, the view will enable the action buttons and display the total working time for the current month.
+
+
+
 
