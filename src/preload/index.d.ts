@@ -4,6 +4,7 @@ import { IStore } from '../main/classes/store'
 import { GoogleSpreadsheetWorksheet } from 'google-spreadsheet'
 import { AvailableCommands } from '../types/automata'
 import { TodaySheetTimesResult, WorkingTimesResult } from '../types/automata/automata-result.interface'
+import { GooglePingResponse } from '../types/automata/google.sheet.interface'
 
 declare global {
   interface Window {
@@ -26,7 +27,7 @@ declare global {
       ) => Promise<void>,
       executeGetWorkTimes: () => Promise<WorkingTimesResult>,
       getTodaySheetTimes: () => Promise<TodaySheetTimesResult>,
-      internetPing: () => Promise<boolean>
+      internetPing: () => Promise<void>
     }
   }
 }
