@@ -71,7 +71,7 @@ const App = (): JSX.Element => {
     })
 
     const resetValuesFromSheet = () => {
-        setValuesFromSheet({...initialValuesFromSheet})
+        setValuesFromSheet({ ...initialValuesFromSheet })
     }
 
     const [appStatus, dispatch] = useReducer(reducer, {
@@ -107,10 +107,9 @@ const App = (): JSX.Element => {
         setIsOpen((prev) => !prev)
     }
 
-    
     const onClickAction = async (option: AvailableCommands) => {
         if (!appStatus.credential || !appStatus.internet) return
-        
+
         setRequestStatus('loading')
         try {
             await window.api.executeWorkAutomate(option)
@@ -121,7 +120,7 @@ const App = (): JSX.Element => {
             setErrorSystemError()
         }
     }
-    
+
     const getWorkingTimes = async () => {
         try {
             const workingTimes = await window.api.executeGetWorkTimes()
@@ -137,7 +136,7 @@ const App = (): JSX.Element => {
             setErrorSystemError()
         }
     }
- 
+
     const updateValuesFromSheet = async () => {
         try {
             const valuesFromSheet = await window.api.getTodaySheetTimes()
@@ -213,17 +212,14 @@ const App = (): JSX.Element => {
         getWorkingTimes()
     }, [])
 
-
-    console.log('appStatus', appStatus)
-
     return (<>
         <div className="shortCuts_button">
-            <img 
-                style={{ color: 'white' }} 
-                alt="logo" 
-                className="shortcut_button" 
-                src={keyboard} 
-                onClick={openClose} 
+            <img
+                style={{ color: 'white' }}
+                alt="logo"
+                className="shortcut_button"
+                src={keyboard}
+                onClick={openClose}
             />
         </div>
 
@@ -237,8 +233,8 @@ const App = (): JSX.Element => {
             updateAll={updateAll}
         />
 
-        <div className="creator">automatizando processos</div>
-        <div className="creator">Powered by Consistem</div>
+        <div className="creator">Automatizando processos</div>
+        <div className="creator">Created by Diego Kennedy</div>
         <div className="text">
             Electron app with <span className="react">React</span>
             &nbsp;and <span className="ts">TypeScript</span>
