@@ -11,10 +11,105 @@ import { AvailableCommands } from '../types/automata'
 import { TodaySheetTimesResult, WorkingTimesResult } from '../types/automata/automata-result.interface'
 import axios from 'axios'
 import { handleMessageFromRenderer } from './handle-message-from-renderer'
+import { CredentialsInfo } from '../types/credentials-info.interface'
 
 const userConfig = new Store(app)
 
 let mainWindow: BrowserWindow
+
+if (!app.requestSingleInstanceLock()) {
+    app.quit()
+} else {
+// This method will be called when Electron has finished
+// initialization and is ready to create browser windows.
+// Some APIs can only be used after this event occurs.
+    app.whenReady().then(async () => {
+        const filesManager = new HandleFiles(dialog)
+
+        // Set app user model id for windows
+        electronApp.setAppUserModelId('com.electron')
+
+        const iconPath = IconHandle.icon(process)
+
+        // Today is better to listen to keyboard shortcuts when the window have focus
+        // globalShortcut.register('Alt+CommandOrControl+I', () => {
+        //   console.log('Electron loves global shortcuts!')
+        // })
+
+        const tray: Tray = new Tray(iconPath)
+        const contextMenu = Menu.buildFromTemplate(TrayManager.trayIconsInfo(app))
+
+        tray.setToolTip('Registrar horários cooperativa')
+        tray.setContextMenu(contextMenu)
+        // this is not working don't figure why
+        tray.on("right-click", () => {
+            console.log('right-click')
+        })
+        
+        tray.on("click", () => {
+            mainWindow.isVisible() ? mainWindow.minimize() : mainWindow.show()
+        })
+            
+        // Default open or close DevTools by F12 in development
+        // and ignore CommandOrControl + R in production.
+        // see https://github.com/alex8088/electron-toolkit/tree/master/packages/utils
+        app.on('browser-window-created', (_, window) => {
+            optimizer.watchWindowShortcuts(window)
+        })
+
+        // IPC test
+        ipcMain.on('ping', () => console.log('pong'))
+
+        ipcMain.handle('showSaveDialog', (_event, method, params) => {
+            return dialog[method](params)
+        })
+
+        ipcMain.handle('get-dirname', () => __dirname)
+
+        ipcMain.handle('dialog:openFile', filesManager.openFile)
+
+        // Save user preference
+        ipcMain.handle('save-preferences', (_event, key, value): void => {
+            const configLocal = userConfig.loadConfig<UserPreferences>()
+            configLocal[key] = value
+            userConfig.saveConfig(configLocal)
+        })
+
+        ipcMain.handle('load-preferences', <T>(_event): Promise<IStore | T> => {
+            return userConfig.loadConfig<T>()
+        })
+
+        handleMessageFromRenderer('execute-work-automate', (
+            _event,
+            option: AvailableCommands
+        ): Promise<void> => executeWorkAutomate(option))
+
+        handleMessageFromRenderer('execute-get-work-times', (
+            _event,
+        ): Promise<WorkingTimesResult> => executeGetWorkTimes())
+
+        handleMessageFromRenderer('get-today-sheet-times', (_event): Promise<TodaySheetTimesResult> => getTodaySheetValues())
+
+        handleMessageFromRenderer('internet-ping', (_event): Promise<void> => internetPing())
+
+        await createWindow()
+
+        app.on('activate', () => {
+            // On macOS it's common to re-create a window in the app when the
+            // dock icon is clicked and there are no other windows open.
+
+            // how to do this on macOs?
+            if (BrowserWindow.getAllWindows().length === 0) createWindow()
+        })
+    })
+
+    // We can quit with with Cmd + Q.
+    app.on('window-all-closed', () => {
+        if (process.platform !== 'darwin') {
+            app.quit()
+        }
+    })
+}
 
 async function createWindow(): Promise<void> {
     const windowBounds = await userConfig.loadConfig<UserPreferences>()
@@ -85,96 +180,6 @@ async function createWindow(): Promise<void> {
     })
 }
 
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
-app.whenReady().then(async () => {
-    const filesManager = new HandleFiles(dialog)
-
-    // Set app user model id for windows
-    electronApp.setAppUserModelId('com.electron')
-
-    const iconPath = IconHandle.icon(process)
-
-    // Today is better to listen to keyboard shortcuts when the window have focus
-    // globalShortcut.register('Alt+CommandOrControl+I', () => {
-    //   console.log('Electron loves global shortcuts!')
-    // })
-
-    const tray: Tray = new Tray(iconPath)
-    const contextMenu = Menu.buildFromTemplate(TrayManager.trayIconsInfo(app))
-
-    tray.setToolTip('Registrar horários cooperativa')
-    tray.setContextMenu(contextMenu)
-    // this is not working don't figure why
-    tray.on("right-click", () => {
-        console.log('right-click')
-    })
-    
-    tray.on("click", () => {
-        mainWindow.isVisible() ? mainWindow.minimize() : mainWindow.show()
-    })
-        
-    // Default open or close DevTools by F12 in development
-    // and ignore CommandOrControl + R in production.
-    // see https://github.com/alex8088/electron-toolkit/tree/master/packages/utils
-    app.on('browser-window-created', (_, window) => {
-        optimizer.watchWindowShortcuts(window)
-    })
-
-    // IPC test
-    ipcMain.on('ping', () => console.log('pong'))
-
-    ipcMain.handle('showSaveDialog', (event, method, params) => {
-        return dialog[method](params)
-    })
-
-    ipcMain.handle('get-dirname', () => __dirname)
-
-    ipcMain.handle('dialog:openFile', filesManager.openFile)
-
-    // Save user preference
-    ipcMain.handle('save-preferences', (event, key, value): void => {
-        const configLocal = userConfig.loadConfig<UserPreferences>()
-        configLocal[key] = value
-        userConfig.saveConfig(configLocal)
-    })
-
-    ipcMain.handle('load-preferences', <T>(event): Promise<IStore | T> => {
-        return userConfig.loadConfig<T>()
-    })
-
-    handleMessageFromRenderer('execute-work-automate', (
-        event,
-        option: AvailableCommands
-    ): Promise<void> => executeWorkAutomate(option))
-
-    handleMessageFromRenderer('execute-get-work-times', (
-        event,
-    ): Promise<WorkingTimesResult> => executeGetWorkTimes())
-
-    handleMessageFromRenderer('get-today-sheet-times', (event): Promise<TodaySheetTimesResult> => getTodaySheetValues())
-
-    handleMessageFromRenderer('internet-ping', (event): Promise<void> => internetPing())
-
-    await createWindow()
-
-    app.on('activate', () => {
-        // On macOS it's common to re-create a window in the app when the
-        // dock icon is clicked and there are no other windows open.
-
-        // how to do this on macOs?
-        if (BrowserWindow.getAllWindows().length === 0) createWindow()
-    })
-})
-
-// We can quit with with Cmd + Q.
-app.on('window-all-closed', () => {
-    if (process.platform !== 'darwin') {
-        app.quit()
-    }
-})
-
 async function internetPing(): Promise<void> {
     const google = "https://www.google.com.br"
     await axios.get(google)
@@ -199,7 +204,7 @@ async function initAuth(): Promise<InitAutomata> {
     const windowBounds = await userConfig.loadConfig<UserPreferences>()
     console.log('windowBounds', windowBounds)
 
-    let credentials: UserPreferences['credentials'] = {
+    let credentials: CredentialsInfo = {
         id: "",
         privateKey: "",
         clientEmail: ""
