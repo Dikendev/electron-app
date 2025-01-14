@@ -1,24 +1,23 @@
 import { useEffect, useReducer, useState } from 'react'
-import ia from './assets/ia.svg'
-import iOff from './assets/ia-off.png'
-
 import keyboard from './assets/keyboard.svg'
+
 import Actions from './components/Actions'
 import Clock from './components/Clock'
 import ShortCuts from './components/Shortcuts'
 import Versions from './components/Versions'
 import Loading, { LoadingStatus } from './components/Loading'
 import Status from './components/Status'
-import { IStore } from '../../types/store.interface'
 import WorkingTimes from './components/WorkingTimes'
+import Logo from './components/Logo'
+
 import { CredentialsInfo } from '../../types/credentials-info.interface'
-import { AvailableCommands, SheetCellContentFilled } from '../../types/automata'
 import { UserPreferences } from '../../types/user-preferences'
+import { IStore } from '../../types/store.interface'
+import { AvailableCommands, SheetCellContentFilled } from '../../types/automata'
 import AppStatus from '../../types/app-status.interface'
 import { UpdateAll } from '../../types/automata/sheet-data.interface'
 
 type AppStatusAction = "APP_UP" | "APP_DOWN" | "INTERNET_UP" | "INTERNET_DOWN"
-// type AppStatusAction = "APP_UP" | "APP_DOWN" | "SET_CREDENTIALS"
 
 interface ReducerState extends AppStatus, CredentialsInfo { }
 
@@ -74,10 +73,10 @@ const App = (): JSX.Element => {
         internet: false
     });
 
-    const [ia, setImage] = useState<string>(iOff)
 
     const updateId = async (id: string) => {
         console.log('chamou???')
+        
         setCredentials((prev) => ({
             ...prev,
             id
@@ -115,7 +114,6 @@ const App = (): JSX.Element => {
             if ('workingTimeTotal' in workingTimes) {
                 setWorkingTimes(workingTimes.workingTimeTotal)
                 setRequestStatus('success')
-                setImage(ia)
                 dispatch({ type: 'APP_UP' })
             }
 
@@ -237,7 +235,7 @@ const App = (): JSX.Element => {
 
         <ShortCuts isOpen={isOpen} />
 
-        <img alt="logo" className="logo" src={iOff} />
+        <Logo credential={appStatus.credential} />
 
         <Status
             appStatus={appStatus}
