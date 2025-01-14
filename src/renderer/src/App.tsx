@@ -1,48 +1,93 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useReducer, useState } from 'react'
 import ia from './assets/ia.svg'
+import iOff from './assets/ia-off.png'
+
 import keyboard from './assets/keyboard.svg'
 import Actions from './components/Actions'
 import Clock from './components/Clock'
 import ShortCuts from './components/Shortcuts'
 import Versions from './components/Versions'
 import Loading, { LoadingStatus } from './components/Loading'
-import Status, { UpdateAll } from './components/Status'
-import { UserPreferences } from '../../types/user-preferences'
+import Status from './components/Status'
 import { IStore } from '../../types/store.interface'
+import WorkingTimes from './components/WorkingTimes'
 import { CredentialsInfo } from '../../types/credentials-info.interface'
+import { AvailableCommands, SheetCellContentFilled } from '../../types/automata'
+import { UserPreferences } from '../../types/user-preferences'
+import AppStatus from '../../types/app-status.interface'
+import { UpdateAll } from '../../types/automata/sheet-data.interface'
+
+type AppStatusAction = "APP_UP" | "APP_DOWN" | "INTERNET_UP" | "INTERNET_DOWN"
+// type AppStatusAction = "APP_UP" | "APP_DOWN" | "SET_CREDENTIALS"
+
+interface ReducerState extends AppStatus, CredentialsInfo { }
+
+const reducer = (state: AppStatus, action: { type: AppStatusAction }): AppStatus => {
+    switch (action.type) {
+        case "APP_UP": {
+            return {
+                credential: true,
+                internet: true
+            }
+        }
+        case "APP_DOWN": {
+            return {
+                credential: false,
+                internet: false
+            }
+        }
+        case "INTERNET_UP": {
+            return {
+                ...state,
+                internet: true
+            }
+        }
+        case "INTERNET_DOWN": {
+            return {
+                ...state,
+                internet: false
+            }
+        }
+        default: return state
+    }
+}
 
 const App = (): JSX.Element => {
     const [isOpen, setIsOpen] = useState(false)
-    const [credentialStatus, setCredentialStatus] = useState<boolean>(true)
-
+    const [workingTimes, setWorkingTimes] = useState<string>("")
+    const [requestStatus, setRequestStatus] = useState<LoadingStatus>('idle')
     const [credentials, setCredentials] = useState<CredentialsInfo>({
-        id: '123',
-        clientEmail: "diken.dev@gmai.com",
-        privateKey: 'private'
+        id: "",
+        clientEmail: "",
+        privateKey: ""
     })
 
-    useEffect(() => {
-        const read = async (): Promise<UserPreferences | IStore> => {
-            return await window.api.loadPreferences<UserPreferences>()
-        }
+    const [valuesFromSheet, setValuesFromSheet] = useState<SheetCellContentFilled>({
+        startWorkingHours: null,
+        startLunch: null,
+        finishLunch: null,
+        finishWorkingHours: null
+    })
 
-        read().then((result) => {
-            if ('credentials' in result) {
-                setCredentials((prev) => ({
-                    ...prev,
-                    ...result.credentials
-                }))
-            }
-        }).catch((error) => {
-            console.error(error)
-        })
-    }, [])
+    const [appStatus, dispatch] = useReducer(reducer, {
+        credential: false,
+        internet: false
+    });
 
-    const updateId = (id: string) => {
+    const [ia, setImage] = useState<string>(iOff)
+
+    const updateId = async (id: string) => {
+        console.log('chamou???')
         setCredentials((prev) => ({
             ...prev,
             id
         }))
+
+        try {
+            await getWorkingTimes()
+        } catch (error) {
+            console.error(error)
+        }
     }
 
     const updateClientEmail = (clientEmail: string) => {
@@ -59,23 +104,105 @@ const App = (): JSX.Element => {
         }))
     }
 
+    function openClose() {
+        setIsOpen((prev) => !prev)
+    }
+
+    const getWorkingTimes = async () => {
+        try {
+            const workingTimes = await window.api.executeGetWorkTimes()
+
+            if ('workingTimeTotal' in workingTimes) {
+                setWorkingTimes(workingTimes.workingTimeTotal)
+                setRequestStatus('success')
+                setImage(ia)
+                dispatch({ type: 'APP_UP' })
+            }
+
+        } catch (error) {
+            setRequestStatus('error')
+            dispatch({ type: 'APP_DOWN' })
+        }
+    }
+
+    const onClickAction = async (option: AvailableCommands) => {
+        if (!appStatus.credential || !appStatus.internet) return
+
+        setRequestStatus('loading')
+        try {
+            await window.api.executeWorkAutomate(option)
+            await getWorkingTimes()
+            await updateValuesFromSheet()
+            setRequestStatus('success')
+        } catch (error) {
+            setRequestStatus('error')
+            dispatch({ type: 'APP_DOWN' })
+        }
+    }
+
+    const updateValuesFromSheet = async () => {
+        try {
+            const valuesFromSheet = await window.api.getTodaySheetTimes()
+            setValuesFromSheet((prev) => ({ ...prev, ...valuesFromSheet }))
+        } catch (error) {
+            console.log('AQUI')
+        }
+    }
+
     const updateAll: UpdateAll = {
         updateId,
         updateClientEmail,
-        updatePrivateKey
+        updatePrivateKey,
+        checkOnUpdate: getWorkingTimes
     }
 
-    const [requestStatus, setRequestStatus] = useState<LoadingStatus>('idle')
+    useEffect(() => {
+        // const internetPing = async (): Promise<void> => {
+        //     try {
+        //         window.api.internetPing()
+        //     } catch (error) {
+        //         console.log('ERROR CATCH ?')
+        //         dispatch({ type: "INTERNET_DOWN" })
+        //     }
+        // }
+
+        window.api.internetPing().then((result) => {
+            dispatch({ type: "INTERNET_UP" })
+
+        }).catch((error) => {
+            dispatch({ type: "INTERNET_DOWN" })
+        })
+    }, [])
 
     useEffect(() => {
-        setTimeout(() => {
-            console.log('?????????')
-            window.api.receive("fromMain", (response) => {
-                console.log("Received response from main process", response)
+        const read = async (): Promise<UserPreferences | IStore> => {
+            return await window.api.loadPreferences<UserPreferences>()
+        }
+
+        try {
+            read().then((result) => {
+                if ('credentials' in result) {
+                    setCredentials((prev) => ({
+                        ...prev,
+                        ...result.credentials
+                    }))
+
+                    getWorkingTimes().then((result) => {
+                        dispatch({ type: 'APP_UP' })
+
+                    }).catch((error) => {
+                        setRequestStatus('error')
+                        dispatch({ type: 'APP_DOWN' })
+                    })
+                }
+            }).catch((error) => {
+                console.error(error)
+                setRequestStatus('error')
+                dispatch({ type: 'APP_DOWN' })
             })
-        }, 5000)
-        // quando iniciar a aplicação verificar o status.
-        // sempre quando acontecer uma modificação na planilha atualizar os status das credenciais.
+        } catch (error) {
+            console.log('CATCH', error)
+        }
     }, [])
 
     useEffect(() => {
@@ -90,22 +217,18 @@ const App = (): JSX.Element => {
         }
     }, [])
 
-    function openClose() {
-        setIsOpen((prev) => !prev)
-    }
+    useEffect(() => {
+        if (requestStatus === 'success') {
+            setTimeout(() => {
+                setRequestStatus('idle')
+            }, 2000);
+        }
+    }, [requestStatus])
 
-    const simulateRequest = () => {
-        setTimeout(() => {
-            setRequestStatus('loading')
-        }, 0)
-
-        setTimeout(() => {
-            setRequestStatus('success')
-        }, 2000)
-        setTimeout(() => {
-            setRequestStatus('idle')
-        }, 3000)
-    }
+    useEffect(() => {
+        updateValuesFromSheet()
+        getWorkingTimes()
+    }, [])
 
     return (<>
         <div className="shortCuts_button">
@@ -114,10 +237,10 @@ const App = (): JSX.Element => {
 
         <ShortCuts isOpen={isOpen} />
 
-        <img alt="logo" className="logo" src={ia} />
+        <img alt="logo" className="logo" src={iOff} />
 
         <Status
-            credentialStatus={credentialStatus}
+            appStatus={appStatus}
             credentials={credentials}
             updateAll={updateAll}
         />
@@ -131,18 +254,23 @@ const App = (): JSX.Element => {
 
         <Clock />
 
-        <p className="tip">
-            {/* Please try pressing <code>F12</code> to open the devTool */}
-            Aqui pode ter uma explicação do app
-        </p>
+        {/* <p className="tip"> */}
+        {/* Please try pressing <code>F12</code> to open the devTool */}
+        {/* Aqui pode ter uma explicação do app */}
+        {/* </p> */}
 
-        <Actions credentialStatus={credentialStatus} simulate={simulateRequest} />
+        <Actions
+            appStatus={appStatus}
+            onClickAction={onClickAction}
+            sheetValues={valuesFromSheet}
+        />
 
         <div style={{ paddingTop: '3rem' }}>
             <Loading status={requestStatus} />
         </div>
 
-        <Versions />
+        <WorkingTimes workingTimesTotal={workingTimes} />
+        <Versions idSheet={credentials.id} />
     </>)
 }
 
