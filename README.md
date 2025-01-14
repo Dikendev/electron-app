@@ -7,7 +7,7 @@ I developed an Electron application to streamline working with spreadsheets. Thi
   <br/>
 
 
-<img src="./resources/app_working.gif" alt="app example" /> 
+<img src="./resources/app_example.gif" alt="app example" /> 
 
   <br/>
 
