@@ -1,5 +1,6 @@
 {
   "name": "electron-app",
+  "license":"AGPL-3.0-only",
   "version": "1.0.0",
   "description": "An Electron application with React and TypeScript",
   "main": "./out/main/index.js",
