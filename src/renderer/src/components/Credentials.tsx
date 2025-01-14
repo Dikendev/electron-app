@@ -98,10 +98,10 @@ const CredentialStatus = (credentialSendStatus: CredentialStatusProps): JSX.Elem
             return (<></>)
         }
         case 'idle': {
-            return (<>Carregando</>)
+            return (<> Carregando</>)
         }
         case 'success': {
-            return (<>Salvo com successo</>)
+            return (<> Sucesso</>)
         }
         default: {
             return (<><p>Algo deu errado</p></>)
