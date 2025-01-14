@@ -30,14 +30,11 @@ const api = {
     }
   },
   receive: (channel, func) => {
-    console.log('chamou o receive')
     const validChannels = ["fromMain"]
 
-    console.log('channel', channel)
     if (validChannels.includes(channel)) {
-      console.log('valido')
 
-      ipcRenderer.on(channel, (event, ...args) => func(...args))
+      ipcRenderer.on(channel, (_event, ...args) => func(...args))
     }
   },
 
