@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import gear from '../assets/gear.svg'
 import { CredentialsInfo } from '../../../types/credentials-info.interface'
 import { UpdateAll } from '../../../types/automata/sheet-data.interface'
@@ -116,55 +116,55 @@ interface CredentialKeyProps {
 }
 
 const CredentialKey = ({ description, value, update }: CredentialKeyProps) => {
-    const isOpenBrowserFileDialog = useRef<boolean>(false)
+    // const isOpenBrowserFileDialog = useRef<boolean>(false)
 
-    const handleFileSelected = (result) => {
-        console.log('result.filePath.toString()', result.filePath.toString())
-    }
+    // const handleFileSelected = (result) => {
+    //     console.log('result.filePath.toString()', result.filePath.toString())
+    // }
 
     const updateCredential = (event) => {
         console.log('value event', event)
         update(event.target.value)
     }
 
-    const openDialog = async () => {
-        const homeDir = `${window.api.os.homeDir}/Desktop`
-        const dialogConfig = {
-            message: 'Aqui tem uma mensagem dinâmica',
-            defaultPath: window.api.path.join(homeDir),
-            title: `Selecionar um caminho para salvar o arquivo`,
-            buttonLabel: 'Salvar',
-            properties: ['openFile'],
-            filters: [
-                { name: 'Json', extensions: ['json'] },
-            ]
-        };
+    // const openDialog = async () => {
+    //     const homeDir = `${window.api.os.homeDir}/Desktop`
+    //     const dialogConfig = {
+    //         message: 'Aqui tem uma mensagem dinâmica',
+    //         defaultPath: window.api.path.join(homeDir),
+    //         title: `Selecionar um caminho para salvar o arquivo`,
+    //         buttonLabel: 'Salvar',
+    //         properties: ['openFile'],
+    //         filters: [
+    //             { name: 'Json', extensions: ['json'] },
+    //         ]
+    //     };
 
-        console.log('isOpenBrowserFileDialog', isOpenBrowserFileDialog)
+    //     console.log('isOpenBrowserFileDialog', isOpenBrowserFileDialog)
 
-        if (isOpenBrowserFileDialog.current) {
-            console.log('NAO PODE ABRIR')
-        } else {
-            console.log('else')
-            isOpenBrowserFileDialog.current = true
+    //     if (isOpenBrowserFileDialog.current) {
+    //         console.log('NAO PODE ABRIR')
+    //     } else {
+    //         console.log('else')
+    //         isOpenBrowserFileDialog.current = true
 
-            window.api.openDialog('showSaveDialog', dialogConfig).then(result => {
-                console.log('result', result)
-                isOpenBrowserFileDialog.current = false
+    //         window.api.openDialog('showSaveDialog', dialogConfig).then(result => {
+    //             console.log('result', result)
+    //             isOpenBrowserFileDialog.current = false
 
-                if (!result.canceled) {
-                    handleFileSelected(result)
+    //             if (!result.canceled) {
+    //                 handleFileSelected(result)
 
-                    window.api.fs.writeFile(result.filePath.toString(), 'Sample', (error) => {
-                        if (error) throw error
-                        console.log('Saved!')
-                    })
-                }
-            }).catch(error => {
-                console.log(error)
-            })
-        }
-    }
+    //                 window.api.fs.writeFile(result.filePath.toString(), 'Sample', (error) => {
+    //                     if (error) throw error
+    //                     console.log('Saved!')
+    //                 })
+    //             }
+    //         }).catch(error => {
+    //             console.log(error)
+    //         })
+    //     }
+    // }
 
     // useEffect(() => {
     //     const openFile = async () => {
