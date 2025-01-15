@@ -1,7 +1,6 @@
 import { GoogleSpreadsheetCell, GoogleSpreadsheetWorksheet } from "google-spreadsheet"
 import { CellNotFoundError } from "../errors/cell-not-found-error"
 import DateUtils from "../utils/date-utils"
-import { AVAILABLE_OPTIONS } from "../constants/available-options.constant"
 import { MonthInvalidError } from "../errors/month-invalid-error"
 import { AvailableCommands, KeyOption, SheetData, } from "../../../types/automata"
 import SheetDataEnum from "../../../types/automata/sheet-data.enum"
@@ -46,13 +45,6 @@ class InitAutomata {
             const cell = this.sheet.getCell(row, dayCell.columnIndex)
 
             if (CellManager.isCellDateEqualsTodayDate(cell)) {
-                console.log('Valores da planilha hoje')
-
-                const cellValues = CellData.cellValues(this.sheet, row, foundCell)
-
-                console.log(JSON.stringify(cellValues, null, 2))
-                console.log(`Dia: ${cell.formattedValue}`)
-
                 this.updateFoundCellRow(foundCell, row)
                 this.updateCell(option, row, foundCell, hourAndMinutes)
 
@@ -60,13 +52,6 @@ class InitAutomata {
                 const totalWorkingHours = this.cellRangeWorkingHours(foundCell)
 
                 this.updateTotalWorkingHours(foundCell, totalWorkingHours)
-
-                console.log(`Updated using command ${option}`)
-                console.log(JSON.stringify(foundCell, null, 2))
-                console.log(`${AVAILABLE_OPTIONS[option]} = ${hourAndMinutes} adicionado com sucesso`)
-
-                console.log('Valores depois do update')
-                console.log(JSON.stringify(CellData.todayValues(this.sheet, foundCell), null, 2))
             }
         }
         return CellData.todayValues(this.sheet, foundCell)
