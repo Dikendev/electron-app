@@ -9,6 +9,7 @@ import CellManager from "./cell-validation"
 import CellData from "./cell-data"
 import ValidationManager from "./validations"
 import { TodaySheetTimesResult, WorkingTimesResult } from "../../../types/automata/automata-result.interface"
+import StringUtils from "../utils/string-utils"
 
 class InitAutomata {
     private sheet: GoogleSpreadsheetWorksheet
@@ -197,15 +198,31 @@ class InitAutomata {
     ): void => {
         const cell = this.sheet.getCell(row, col)
         const colValue = cell.columnIndex
+        const cellValue = cell.value
 
-        if (cell.value === SheetDataEnum.DAYS) {
-            foundCell.fistRow = row + 1
-            this.setRowAndColValues(foundCell, colValue, 'daysCol')
+        if (typeof cellValue === 'string') {
+            const normalizeWord = StringUtils.normalizeWord(cellValue).toUpperCase()
+
+            switch (normalizeWord) {
+                case SheetDataEnum.DAYS: {
+                    foundCell.fistRow = row + 1
+                    this.setRowAndColValues(foundCell, colValue, 'daysCol')
+                    break
+                }
+                case SheetDataEnum.WORKING_HOURS: {
+                    this.setRowAndColValues(foundCell, colValue, 'workingTimesCol')
+                    break
+                }
+                case SheetDataEnum.WORKING_HOUR_START: {
+                    this.setRowAndColValues(foundCell, colValue, 'startTime1ndCol', 'startTime2ndCol')
+                    break
+                }
+                case SheetDataEnum.WORKING_HOUR_FINISH: {
+                    this.setRowAndColValues(foundCell, colValue, 'finishTime1ndCol', 'finishTime2ndCol')
+                    break
+                }
+            }
         }
-
-        if (cell.value === SheetDataEnum.WORKING_HOURS) this.setRowAndColValues(foundCell, colValue, 'workingTimesCol')
-        if (cell.value === SheetDataEnum.WORKING_HOUR_START) this.setRowAndColValues(foundCell, colValue, 'startTime1ndCol', 'startTime2ndCol')
-        if (cell.value === SheetDataEnum.WORKING_HOUR_FINISH) this.setRowAndColValues(foundCell, colValue, 'finishTime1ndCol', 'finishTime2ndCol')
     }
 
     private setRowAndColValues = (
@@ -260,12 +277,10 @@ class InitAutomata {
         return result.reduce((sum, time) => sum + this.timeToSeconds([time[0], time[1]]), 0);
     }
 
-    // Function to convert time array to total seconds
     private timeToSeconds = ([hh, mm]: [string, string]) => {
         return parseInt(hh, 10) * 3600 + parseInt(mm, 10) * 60;
     };
 
-    // Function to convert total seconds to hh:mm format
     private secondsToTime = (totalSeconds: number) => {
         const hours = Math.floor(totalSeconds / 3600);
         const minutes = Math.floor((totalSeconds % 3600) / 60);
