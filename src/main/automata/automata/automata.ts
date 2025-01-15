@@ -251,7 +251,7 @@ class InitAutomata {
         }
 
         const totalSeconds = this.sunAllTimes(result)
-        return this.secondsToTime(totalSeconds);
+        return DateUtils.secondsToTime(totalSeconds);
     }
 
     private updateTotalWorkingHours = (foundCell: SheetData, totalTime: string[]): void => {
@@ -261,12 +261,6 @@ class InitAutomata {
     private sunAllTimes = (result: string[][]): number => {
         return result.reduce((sum, time) => sum + DateUtils.timeToSeconds([time[0], time[1]]), 0);
     }
-
-    private secondsToTime = (totalSeconds: number): string[] => {
-        const hours = Math.floor(totalSeconds / 3600) + 1;
-        const minutes = Math.floor((totalSeconds % 3600) / 60);
-        return [hours.toString().padStart(2, '0'), minutes.toString().padStart(2, '0')];
-    };
 
     private initSheetData = (): SheetData => {
         return {

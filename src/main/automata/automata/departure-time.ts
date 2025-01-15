@@ -7,15 +7,20 @@ interface Times {
     expectedWorkingTimes: string
 }
 
-const calculateDepartureTime = ({ startWorkingHourTime, startLunchTime, expectedWorkingTimes, finishLunchTime }: Times) => {
+const calculateDepartureTime = ({ 
+    startWorkingHourTime, 
+    startLunchTime, 
+    expectedWorkingTimes, 
+    finishLunchTime 
+}: Times) => {
     const startAsSeconds = timeAsSeconds(startWorkingHourTime)
     const startLunchAsSeconds = timeAsSeconds(startLunchTime)
     const lunchSeconds = timeAsSeconds(finishLunchTime)
-
     const expectedWorkingTimeInSeconds = timeAsSeconds(expectedWorkingTimes)
-    const totalLunch =  startLunchAsSeconds - lunchSeconds
+
+    const totalLunch = startLunchAsSeconds - lunchSeconds
     const sum = (startAsSeconds + expectedWorkingTimeInSeconds) + (totalLunch)
-    return secondsToTime(sum)
+    return DateUtils.secondsToTime(sum)
 }
 
 const timeAsSeconds = (str: string) => {
@@ -30,11 +35,5 @@ const timeAsSeconds = (str: string) => {
 //     expectedWorkingTimes: "08:58"
 // })
 
-
-function secondsToTime(totalSeconds: number): string[] {
-    const hours = Math.floor(totalSeconds / 3600)
-    const minutes = Math.floor((totalSeconds % 3600) / 60);
-    return [hours.toString().padStart(2, '0'), minutes.toString().padStart(2, '0')];
-};
 
 export { calculateDepartureTime }

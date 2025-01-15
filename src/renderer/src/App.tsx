@@ -17,6 +17,7 @@ import { AvailableCommands } from '../../types/automata'
 import AppStatus from '../../types/app-status.interface'
 import { UpdateAll } from '../../types/automata/sheet-data.interface'
 import { SheetViewData } from 'src/types/sheet-view-data.interface'
+import DepartureTime from './components/DepartureTime'
 
 type AppStatusAction = "APP_UP" | "APP_DOWN" | "INTERNET_UP" | "INTERNET_DOWN"
 
@@ -296,6 +297,7 @@ const App = (): JSX.Element => {
         </div>
 
         <WorkingTimes workingTimesTotal={workingTimes} />
+        <DepartureTime />
         <Versions idSheet={credentials.id} />
     </>)
 }
