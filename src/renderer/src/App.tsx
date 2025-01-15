@@ -13,9 +13,10 @@ import Logo from './components/Logo'
 import { CredentialsInfo } from '../../types/credentials-info.interface'
 import { UserPreferences } from '../../types/user-preferences'
 import { IStore } from '../../types/store.interface'
-import { AvailableCommands, SheetCellContentFilled } from '../../types/automata'
+import { AvailableCommands } from '../../types/automata'
 import AppStatus from '../../types/app-status.interface'
 import { UpdateAll } from '../../types/automata/sheet-data.interface'
+import { SheetViewData } from 'src/types/sheet-view-data.interface'
 
 type AppStatusAction = "APP_UP" | "APP_DOWN" | "INTERNET_UP" | "INTERNET_DOWN"
 
@@ -49,11 +50,27 @@ const reducer = (state: AppStatus, action: { type: AppStatusAction }): AppStatus
     }
 }
 
-const initialValuesFromSheet: SheetCellContentFilled = {
-    startWorkingHours: null,
-    startLunch: null,
-    finishLunch: null,
-    finishWorkingHours: null
+const initialValuesFromSheet: SheetViewData = {
+    startWorkingHours: {
+        action: 'INICIO_EXP',
+        description: 'Início do expediente',
+        value: null
+    },
+    startLunch: {
+        action: 'INICIO_ALM',
+        description: 'Início do almoço',
+        value: null
+    },
+    finishLunch:  {
+        action: 'FIM_ALM',
+        description: 'Fim do almoço',
+        value: null
+    },
+    finishWorkingHours:  {
+        action: 'FIM_EXP',
+        description: 'Fim do expediente',
+        value: null
+    },
 }
 
 const App = (): JSX.Element => {
@@ -66,7 +83,7 @@ const App = (): JSX.Element => {
         privateKey: ""
     })
 
-    const [valuesFromSheet, setValuesFromSheet] = useState<SheetCellContentFilled>({
+    const [valuesFromSheet, setValuesFromSheet] = useState<SheetViewData>({
         ...initialValuesFromSheet
     })
 
@@ -140,7 +157,28 @@ const App = (): JSX.Element => {
     const updateValuesFromSheet = async () => {
         try {
             const valuesFromSheet = await window.api.getTodaySheetTimes()
-            setValuesFromSheet((prev) => ({ ...prev, ...valuesFromSheet }))
+
+            if ('startWorkingHours' in valuesFromSheet) {
+                setValuesFromSheet((prev) => ({
+                    ...prev,
+                    startWorkingHours: {
+                        ...prev.startWorkingHours,
+                        value: valuesFromSheet.startWorkingHours
+                    } ,
+                    startLunch: {
+                        ...prev.startLunch,
+                        value: valuesFromSheet.startLunch
+                    },
+                    finishLunch: {
+                        ...prev.finishLunch,
+                        value: valuesFromSheet.finishLunch
+                    },
+                    finishWorkingHours: {
+                        ...prev.finishWorkingHours,
+                        value: valuesFromSheet.finishWorkingHours
+                    }
+                }))
+            }
         } catch (error) {
             setErrorSystemError()
         }

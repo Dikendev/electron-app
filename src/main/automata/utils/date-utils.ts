@@ -46,6 +46,10 @@ class DateUtils {
         const minutes = Number(splitHourAndMinutes[1])
         return (hours + minutes / 60) / 24;
     }
+
+    static timeToSeconds([hh, mm]: [string, string]): number {
+        return parseInt(hh, 10) * 3600 + parseInt(mm, 10) * 60;
+    };
 }
 
 export default DateUtils

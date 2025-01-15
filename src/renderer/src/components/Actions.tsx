@@ -1,12 +1,15 @@
 import { useCallback } from "react"
+
 import AppStatus from "../../../types/app-status.interface"
-import { AvailableCommands, SheetCellContentFilled } from "../../../types/automata"
+import { AvailableCommands } from "../../../types/automata"
 import { ExistOrNot } from "../../../types/automata/sheet-data.interface"
+import { SheetCellContentFilledValue, SheetViewData } from "src/types/sheet-view-data.interface"
+
 import Tooltip from "./Tooltip"
 
 interface ActionsProps {
     appStatus: AppStatus
-    sheetValues: SheetCellContentFilled
+    sheetValues: SheetViewData
     onClickAction: (options: AvailableCommands) => void
 }
 
@@ -14,35 +17,19 @@ const Actions = ({
     appStatus,
     onClickAction,
     sheetValues
-}: ActionsProps): JSX.Element => {
-    return (
-        <div className="actions">
+}: ActionsProps): JSX.Element[] => {
+    return Object.keys(sheetValues).map((sheet) => {
+        const resultValue = sheetValues[sheet] as SheetCellContentFilledValue
+        
+        return (
             <ActionStatus
                 appStatus={appStatus.credential}
-                sheetValue={sheetValues.startWorkingHours}
-                description="Início do expediente"
-                onClick={() => onClickAction('INICIO_EXP')}
+                sheetValue={resultValue.value}
+                description={resultValue.description}
+                onClick={() => onClickAction(resultValue.action)}
             />
-            <ActionStatus
-                appStatus={appStatus.credential}
-                sheetValue={sheetValues.startLunch}
-                description="Início do almoço"
-                onClick={() => onClickAction('INICIO_ALM')}
-            />
-            <ActionStatus
-                appStatus={appStatus.credential}
-                sheetValue={sheetValues.finishLunch}
-                description="Fim do almoço"
-                onClick={() => onClickAction('FIM_ALM')}
-            />
-            <ActionStatus
-                appStatus={appStatus.credential}
-                sheetValue={sheetValues.finishWorkingHours}
-                description="Fim do expediente"
-                onClick={() => onClickAction('FIM_EXP')}
-            />
-        </div>
-    )
+        )
+    })
 }
 
 interface ActionStatusProps {

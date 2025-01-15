@@ -254,20 +254,16 @@ class InitAutomata {
         return this.secondsToTime(totalSeconds);
     }
 
-    private updateTotalWorkingHours = (foundCell: SheetData, totalTime: string[]) => {
+    private updateTotalWorkingHours = (foundCell: SheetData, totalTime: string[]): void => {
         foundCell.totalWorkingHours = totalTime.join(':')
     }
 
-    private sunAllTimes = (result: string[][]) => {
-        return result.reduce((sum, time) => sum + this.timeToSeconds([time[0], time[1]]), 0);
+    private sunAllTimes = (result: string[][]): number => {
+        return result.reduce((sum, time) => sum + DateUtils.timeToSeconds([time[0], time[1]]), 0);
     }
 
-    private timeToSeconds = ([hh, mm]: [string, string]) => {
-        return parseInt(hh, 10) * 3600 + parseInt(mm, 10) * 60;
-    };
-
-    private secondsToTime = (totalSeconds: number) => {
-        const hours = Math.floor(totalSeconds / 3600);
+    private secondsToTime = (totalSeconds: number): string[] => {
+        const hours = Math.floor(totalSeconds / 3600) + 1;
         const minutes = Math.floor((totalSeconds % 3600) / 60);
         return [hours.toString().padStart(2, '0'), minutes.toString().padStart(2, '0')];
     };
