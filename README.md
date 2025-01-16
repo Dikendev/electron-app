@@ -21,27 +21,11 @@ I developed an Electron application to streamline working with spreadsheets. Thi
 >    - HORÁRIO DE TÉRMINO
 >    - HORAS TRABALHADAS
 
-<!-- > [!NOTE]
-> A legacy setting `markdown.marp.chromePath` is deprecated since v2. Please use `markdown.marp.browserPath` instead. -->
-
-# The requirement to this app work is:
-
-  1. The sheet must exist with the correct title in the month and year format (MMM/YY).
-
-  2. Days column format as DD/MM
-
-  3. The header must be exactly as demonstrated above:
-    - DIAS
-    - HORÁRIO INÍCIO
-    - HORÁRIO DE TÉRMINO
-    - HORAS TRABALHADAS
-
 <img width="800" src="./resources/sheet_example.png" alt="sheet example" /> 
 
 ### How to run
 ```bash
 $ npm run dev
-
 ```
 
 ### Build
@@ -62,12 +46,10 @@ $ npm run build:linux
 ### Step 1: Access Google Cloud Console
   Visit [Google Cloud Console](https://console.cloud.google.com/).
 
-
 ### Step 2: Navigate to APIs & Services
   1. Click on **APIs & Services** in the left-hand menu.
   
   <br/>
-
 
 <img src="./resources/first_step.gif" alt="first step" /> 
 
@@ -120,7 +102,6 @@ $ npm run build:linux
   
   <br/>
 
-
 <img src="./resources/add_credential.svg" alt="adding credential" /> 
   
   <br/>
@@ -135,6 +116,5 @@ $ npm run build:linux
 
   5. If all steps are completed successfully, the view will enable the action buttons and display the total working time for the current month.
 
-
-
-
+> [!NOTE]
+> Contact me or submit a bug, diken.dev@gmail.com
