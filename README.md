@@ -10,7 +10,6 @@ I developed an Electron application to streamline working with spreadsheets. Thi
 
   <br/>
 
-
 > [!IMPORTANT]
 > The requirement to this app work is:   
 > 1. The sheet must exist with the correct title in the month and year format (MMM/YY).
