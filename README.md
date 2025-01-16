@@ -6,10 +6,23 @@ I developed an Electron application to streamline working with spreadsheets. Thi
 
   <br/>
 
-
 <img src="./resources/app_example.gif" alt="app example" /> 
 
   <br/>
+
+
+> [!IMPORTANT]
+> The requirement to this app work is:   
+> 1. The sheet must exist with the correct title in the month and year format (MMM/YY).
+> 2. Days column format as DD/MM
+> 3. The header must be exactly as demonstrated above:
+>    - DIAS
+>    - HORÁRIO INÍCIO
+>    - HORÁRIO DE TÉRMINO
+>    - HORAS TRABALHADAS
+
+<!-- > [!NOTE]
+> A legacy setting `markdown.marp.chromePath` is deprecated since v2. Please use `markdown.marp.browserPath` instead. -->
 
 # The requirement to this app work is:
 
