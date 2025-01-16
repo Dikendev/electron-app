@@ -1,4 +1,4 @@
-import { useEffect, useReducer, useState } from 'react'
+import { useEffect, useMemo, useReducer, useState } from 'react'
 import keyboard from './assets/keyboard.svg'
 
 import Actions from './components/Actions'
@@ -17,6 +17,7 @@ import { AvailableCommands } from '../../types/automata'
 import AppStatus from '../../types/app-status.interface'
 import { UpdateAll } from '../../types/automata/sheet-data.interface'
 import { SheetViewData } from 'src/types/sheet-view-data.interface'
+import { DepartureTimeResponse } from 'src/types/automata/departure-time.interface'
 import DepartureTime from './components/DepartureTime'
 
 type AppStatusAction = "APP_UP" | "APP_DOWN" | "INTERNET_UP" | "INTERNET_DOWN"
@@ -198,6 +199,28 @@ const App = (): JSX.Element => {
         checkOnUpdate: getWorkingTimes
     }
 
+    const calculateExpectedFinalTime = useMemo((): DepartureTimeResponse => {
+        const startWorkingHourTime = valuesFromSheet.startWorkingHours.value
+        const startLunchTime = valuesFromSheet.startLunch.value
+        const finishLunchTime = valuesFromSheet.finishWorkingHours.value
+    
+
+        if (startWorkingHourTime && startLunchTime && finishLunchTime) {
+           return window.api.departureTime({ 
+                startWorkingHourTime, 
+                startLunchTime, 
+                expectedWorkingTimes: "17:30", 
+                finishLunchTime 
+            })
+        }
+
+        return {
+            totalLunch: "",
+            expectedFinalWorkingTime: ""
+        }
+    }, [valuesFromSheet.startWorkingHours, valuesFromSheet.startLunch, valuesFromSheet.finishWorkingHours])
+
+
     useEffect(() => {
         window.api.internetPing().then(() => {
             dispatch({ type: "INTERNET_UP" })
@@ -297,7 +320,7 @@ const App = (): JSX.Element => {
         </div>
 
         <WorkingTimes workingTimesTotal={workingTimes} />
-        <DepartureTime />
+        <DepartureTime totalHoursAtLunch={calculateExpectedFinalTime.totalLunch} dayTotalTime={'17:30'} expectedFinalWorkingHour={calculateExpectedFinalTime.expectedFinalWorkingTime} />
         <Versions idSheet={credentials.id} />
     </>)
 }

@@ -8,6 +8,7 @@ import { IStore } from '../types/store.interface'
 import { AvailableCommands } from '../types/automata'
 import { TodaySheetTimesResult, WorkingTimesResult } from '../types/automata/automata-result.interface'
 import { sendMessageToMain } from '../main/handle-message-from-renderer'
+import { DepartureTimeResponse, Times } from '../types/automata/departure-time.interface'
 
 // Custom APIs for renderer
 const api = {
@@ -50,7 +51,18 @@ const api = {
   executeWorkAutomate: (option: AvailableCommands): Promise<void> => sendMessageToMain('execute-work-automate', option),
   executeGetWorkTimes: (): Promise<WorkingTimesResult> => sendMessageToMain('execute-get-work-times'),
   getTodaySheetTimes: (): Promise<TodaySheetTimesResult> => sendMessageToMain('get-today-sheet-times'),
-  internetPing: (): Promise<void> => sendMessageToMain('internet-ping')
+  internetPing: (): Promise<void> => sendMessageToMain('internet-ping'),
+  handleMessageFromRenderer: ({ 
+    startWorkingHourTime, 
+    startLunchTime, 
+    expectedWorkingTimes, 
+    finishLunchTime 
+  }: Times): Promise<DepartureTimeResponse> => sendMessageToMain('departure-time',{ 
+    startWorkingHourTime, 
+    startLunchTime, 
+    expectedWorkingTimes, 
+    finishLunchTime 
+  })
 }
 
 // Use `contextBridge` APIs to expose Electron APIs to

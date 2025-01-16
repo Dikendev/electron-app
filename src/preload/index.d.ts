@@ -5,6 +5,7 @@ import { GoogleSpreadsheetWorksheet } from 'google-spreadsheet'
 import { AvailableCommands } from '../types/automata'
 import { TodaySheetTimesResult, WorkingTimesResult } from '../types/automata/automata-result.interface'
 import { GooglePingResponse } from '../types/automata/google.sheet.interface'
+import { DepartureTime, Times } from 'src/types/automata/departure-time.interface'
 
 declare global {
   interface Window {
@@ -28,6 +29,12 @@ declare global {
       executeGetWorkTimes: () => Promise<WorkingTimesResult>,
       getTodaySheetTimes: () => Promise<TodaySheetTimesResult>,
       internetPing: () => Promise<void>
+      departureTime: ({ 
+        startWorkingHourTime, 
+        startLunchTime, 
+        expectedWorkingTimes, 
+        finishLunchTime 
+      }: Times) => DepartureTime
     }
   }
 }

@@ -20,6 +20,10 @@ I developed an Electron application to streamline working with spreadsheets. Thi
 >    - HORÁRIO DE TÉRMINO
 >    - HORAS TRABALHADAS
 
+## Features
+
+You can use commands to execute actions easily **"Inicio do expediente..."** menu (<kbd>Alt</kbd> + <kbd>Ctrl</kbd> + <kbd>E</kbd> + <kbd>N</kbd> / <kbd>Alt</kbd> + <kbd>Cmd</kbd> + <kbd>Ctrl</kbd> + <kbd>N</kbd>) to start the working time quickly.
+
 <img width="800" src="./resources/sheet_example.png" alt="sheet example" /> 
 
 ### How to run

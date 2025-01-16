@@ -51,7 +51,7 @@ class InitAutomata {
                 await this.sheet.saveUpdatedCells()
                 const totalWorkingHours = this.cellRangeWorkingHours(foundCell)
 
-                this.updateTotalWorkingHours(foundCell, totalWorkingHours)
+                foundCell.totalWorkingHours = totalWorkingHours
             }
         }
         return CellData.todayValues(this.sheet, foundCell)
@@ -117,7 +117,7 @@ class InitAutomata {
 
             if (CellManager.isCellDateEqualsTodayDate(cell)) {
                 return {
-                    workingTimeTotal: this.cellRangeWorkingHours(foundCell).join(':')
+                    workingTimeTotal: this.cellRangeWorkingHours(foundCell)
                 }
             }
         }
@@ -228,7 +228,7 @@ class InitAutomata {
         }
     }
 
-    private cellRangeWorkingHours = (foundCell: SheetData): string[] => {
+    private cellRangeWorkingHours = (foundCell: SheetData): string => {
         const sum = new Date()
         sum.setHours(0, 0, 0, 0)
 
@@ -252,10 +252,6 @@ class InitAutomata {
 
         const totalSeconds = this.sunAllTimes(result)
         return DateUtils.secondsToTime(totalSeconds);
-    }
-
-    private updateTotalWorkingHours = (foundCell: SheetData, totalTime: string[]): void => {
-        foundCell.totalWorkingHours = totalTime.join(':')
     }
 
     private sunAllTimes = (result: string[][]): number => {

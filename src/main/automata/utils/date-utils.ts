@@ -51,10 +51,10 @@ class DateUtils {
         return parseInt(hh, 10) * 3600 + parseInt(mm, 10) * 60;
     };
 
-    static secondsToTime (totalSeconds: number): string[] {
+    static secondsToTime (totalSeconds: number): string {
         const hours = Math.floor(totalSeconds / 3600) + 1;
         const minutes = Math.floor((totalSeconds % 3600) / 60);
-        return [hours.toString().padStart(2, '0'), minutes.toString().padStart(2, '0')];
+        return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
     };
 }
 

@@ -12,6 +12,8 @@ import { TodaySheetTimesResult, WorkingTimesResult } from '../types/automata/aut
 import axios from 'axios'
 import { handleMessageFromRenderer } from './handle-message-from-renderer'
 import { CredentialsInfo } from '../types/credentials-info.interface'
+import { calculateDepartureTime } from './automata/automata/departure-time'
+import { DepartureTimeResponse, Times } from '../types/automata/departure-time.interface'
 
 const userConfig = new Store(app)
 
@@ -91,6 +93,18 @@ if (!app.requestSingleInstanceLock()) {
         handleMessageFromRenderer('get-today-sheet-times', (_event): Promise<TodaySheetTimesResult> => getTodaySheetValues())
 
         handleMessageFromRenderer('internet-ping', (_event): Promise<void> => internetPing())
+
+        handleMessageFromRenderer('departure-time', (_event, { 
+            startWorkingHourTime, 
+            startLunchTime, 
+            expectedWorkingTimes, 
+            finishLunchTime 
+        }: Times): DepartureTimeResponse => calculateDepartureTime({ 
+            startWorkingHourTime, 
+            startLunchTime, 
+            expectedWorkingTimes, 
+            finishLunchTime 
+        }))
 
         await createWindow()
 

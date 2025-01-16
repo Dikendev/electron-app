@@ -1,26 +1,24 @@
+import { DepartureTimeResponse, Times } from "../../../types/automata/departure-time.interface"
 import DateUtils from "../utils/date-utils"
-
-interface Times {
-    startWorkingHourTime: string
-    startLunchTime: string
-    finishLunchTime: string
-    expectedWorkingTimes: string
-}
 
 const calculateDepartureTime = ({ 
     startWorkingHourTime, 
     startLunchTime, 
     expectedWorkingTimes, 
     finishLunchTime 
-}: Times) => {
+}: Times): DepartureTimeResponse => {
     const startAsSeconds = timeAsSeconds(startWorkingHourTime)
     const startLunchAsSeconds = timeAsSeconds(startLunchTime)
-    const lunchSeconds = timeAsSeconds(finishLunchTime)
     const expectedWorkingTimeInSeconds = timeAsSeconds(expectedWorkingTimes)
+    const lunchSeconds = timeAsSeconds(finishLunchTime)
 
     const totalLunch = startLunchAsSeconds - lunchSeconds
     const sum = (startAsSeconds + expectedWorkingTimeInSeconds) + (totalLunch)
-    return DateUtils.secondsToTime(sum)
+
+    return {
+        totalLunch: Math.abs(totalLunch).toString(),
+        expectedFinalWorkingTime: DateUtils.secondsToTime(sum)
+    }
 }
 
 const timeAsSeconds = (str: string) => {
