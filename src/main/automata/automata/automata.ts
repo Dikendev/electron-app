@@ -1,12 +1,10 @@
 import { GoogleSpreadsheetCell, GoogleSpreadsheetWorksheet } from "google-spreadsheet"
 import { CellNotFoundError } from "../errors/cell-not-found-error"
 import DateUtils from "../utils/date-utils"
-import { MonthInvalidError } from "../errors/month-invalid-error"
 import { AvailableCommands, KeyOption, SheetData, } from "../../../types/automata"
 import SheetDataEnum from "../../../types/automata/sheet-data.enum"
 import CellManager from "./cell-validation"
 import CellData from "./cell-data"
-import ValidationManager from "./validations"
 import { TodaySheetTimesResult, WorkingTimesResult } from "../../../types/automata/automata-result.interface"
 import StringUtils from "../utils/string-utils"
 
@@ -18,8 +16,6 @@ class InitAutomata {
     }
 
     execute = async (option: AvailableCommands): Promise<TodaySheetTimesResult> => {
-        if (!ValidationManager.isMonthValid(this.sheet.title)) return new MonthInvalidError()
-
         await this.sheet.loadCells()
 
         let foundCell = this.searchForSheetTitles()
@@ -58,8 +54,6 @@ class InitAutomata {
     }
 
     todayValues = async (): Promise<TodaySheetTimesResult> => {
-        if (!ValidationManager.isMonthValid(this.sheet.title)) return new MonthInvalidError()
-
         await this.sheet.loadCells()
 
         let foundCell = this.searchForSheetTitles()
@@ -91,8 +85,6 @@ class InitAutomata {
     }
 
     executeWorkingHours = async (): Promise<WorkingTimesResult> => {
-        if (!ValidationManager.isMonthValid(this.sheet.title)) return new MonthInvalidError()
-
         await this.sheet.loadCells()
 
         let foundCell = this.searchForSheetTitles()
@@ -184,7 +176,6 @@ class InitAutomata {
         const cell = this.sheet.getCell(row, col)
         const colValue = cell.columnIndex
         const cellValue = cell.value
-
         if (typeof cellValue === 'string') {
             const normalizeWord = StringUtils.normalizeWord(cellValue).toUpperCase()
 
