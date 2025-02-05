@@ -2,9 +2,11 @@ export class InvalidDateFormatError extends RangeError { }
 
 class DateUtils {
     static formatDateWithDayAndMonth(): string {
-        const toDay = new Date()
-        const toDayDateWithLeadingMissingZeros = String(toDay.getDate()).padStart(2, '0')
-        return `${toDayDateWithLeadingMissingZeros}/${toDay.getMonth() + String(toDay.getMonth() + 1)}`
+        const toDay = new Date();
+        const toDayDateWithLeadingMissingZeros = String(toDay.getDate()).padStart(2, '0');
+        const month = `${toDay.getMonth() + 1}`;
+        const monthWithLeadingZeroes = month.padStart(2, '0');
+        return `${toDayDateWithLeadingMissingZeros}/${monthWithLeadingZeroes}`;
     }
 
     static addHourToDate(date: Date, hour: number) {

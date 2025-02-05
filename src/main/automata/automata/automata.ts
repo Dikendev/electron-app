@@ -72,10 +72,8 @@ class InitAutomata {
 
         if (!cellValidation) return new CellNotFoundError()
 
-        const dayCell = this.sheet.getCell(0, foundCell.daysCol)
-
         for (let row = foundCell.fistRow; row < this.sheet.rowCount; row++) {
-            const cell = this.sheet.getCell(row, dayCell.columnIndex)
+            const cell = this.sheet.getCell(row, daysCol)
 
             if (CellManager.isCellDateEqualsTodayDate(cell)) {
                 return CellData.cellValues(this.sheet, row, foundCell)
@@ -89,7 +87,8 @@ class InitAutomata {
 
         let foundCell = this.searchForSheetTitles()
 
-        const { daysCol, startTime1ndCol, finishTime1ndCol, startTime2ndCol, finishTime2ndCol } = foundCell
+        const { daysCol, startTime1ndCol, finishTime1ndCol, startTime2ndCol, finishTime2ndCol, fistRow } = foundCell
+        
         const cellValidation = CellManager.isCellValid(
             {
                 daysCol,
@@ -102,10 +101,9 @@ class InitAutomata {
 
         if (!cellValidation) return new CellNotFoundError()
 
-        const dayCell = this.sheet.getCell(0, foundCell.daysCol)
+        for (let row = fistRow; row < this.sheet.rowCount; row++) {
 
-        for (let row = foundCell.fistRow; row < this.sheet.rowCount; row++) {
-            const cell = this.sheet.getCell(row, dayCell.columnIndex)
+            const cell = this.sheet.getCell(row, daysCol)
 
             if (CellManager.isCellDateEqualsTodayDate(cell)) {
                 return {
