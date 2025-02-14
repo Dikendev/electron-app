@@ -1,11 +1,11 @@
-import { useCallback } from "react"
+import { useCallback } from 'react'
 
-import AppStatus from "../../../types/app-status.interface"
-import { AvailableCommands } from "../../../types/automata"
-import { ExistOrNot } from "../../../types/automata/sheet-data.interface"
-import { SheetCellContentFilledValue, SheetViewData } from "src/types/sheet-view-data.interface"
+import AppStatus from '../../../types/app-status.interface'
+import { AvailableCommands } from '../../../types/automata'
+import { ExistOrNot } from '../../../types/automata/sheet-data.interface'
+import { SheetCellContentFilledValue, SheetViewData } from 'src/types/sheet-view-data.interface'
 
-import Tooltip from "./Tooltip"
+import Tooltip from './Tooltip'
 
 interface ActionsProps {
     appStatus: AppStatus
@@ -13,17 +13,14 @@ interface ActionsProps {
     onClickAction: (options: AvailableCommands) => void
 }
 
-const Actions = ({
-    appStatus,
-    onClickAction,
-    sheetValues
-}: ActionsProps): JSX.Element[] => {
+const Actions = ({ appStatus, onClickAction, sheetValues }: ActionsProps): JSX.Element[] => {
     return Object.keys(sheetValues).map((sheet) => {
         const resultValue = sheetValues[sheet] as SheetCellContentFilledValue
-        
+
         return (
             <ActionStatus
-                appStatus={appStatus.credential}
+                key={sheet}
+                appStatus={appStatus}
                 sheetValue={resultValue.value}
                 description={resultValue.description}
                 onClick={() => onClickAction(resultValue.action)}
@@ -33,10 +30,10 @@ const Actions = ({
 }
 
 interface ActionStatusProps {
-    appStatus: boolean
-    sheetValue: ExistOrNot
-    description: string
-    onClick: () => void
+    appStatus: AppStatus;
+    sheetValue: ExistOrNot;
+    description: string;
+    onClick: () => void;
 }
 
 const ActionStatus = ({
@@ -50,14 +47,15 @@ const ActionStatus = ({
     }, [description])
 
     const appStatusStyle = useCallback(() => {
-        return  appStatus ? 'action' : 'action disabled'
+        return !appStatus.today ? 'action' : 'action disabled'
     }, [appStatus])
 
     return (
         <div
             style={{ position: 'relative' }}
             className={`${buttonDescriptionClass()} ${appStatusStyle()}`}
-            onClick={() => onClick()}>
+            onClick={() => onClick()}
+        >
             <a>{description}</a>
             <SheetValues sheetValues={sheetValue} />
         </div>
@@ -77,16 +75,15 @@ const SheetValues = ({ sheetValues }: SheetValuesProp): JSX.Element => {
                 left: 50,
                 right: 50,
                 width: '5rem',
-                textAlign: "center",
-                borderRadius: "0.3rem"
-            }}>
+                textAlign: 'center',
+                borderRadius: '0.3rem'
+            }}
+        >
             {sheetValues ? (
-                <Tooltip
-                    className="tip"
-                    description={sheetValues}
-                    tooltip="Horário registrado"
-                />
-            ) : ('-')}
+                <Tooltip className="tip" description={sheetValues} tooltip="Horário registrado" />
+            ) : (
+                '-'
+            )}
         </code>
     )
 }
