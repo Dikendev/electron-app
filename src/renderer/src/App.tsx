@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useReducer, useState } from 'react'
+import { useEffect, useReducer, useState } from 'react'
 import keyboard from './assets/keyboard.svg'
 
 import Actions from './components/Actions'
@@ -9,6 +9,8 @@ import Loading, { LoadingStatus } from './components/Loading'
 import Status from './components/Status'
 import WorkingTimes from './components/WorkingTimes'
 import Logo from './components/Logo'
+import DepartureTime from './components/DepartureTime'
+import FinalDepartureTime from './components/FinalDepartureTime'
 
 import { CredentialsInfo } from '../../types/credentials-info.interface'
 import { UserPreferences } from '../../types/user-preferences'
@@ -17,38 +19,52 @@ import { AvailableCommands } from '../../types/automata'
 import AppStatus from '../../types/app-status.interface'
 import { UpdateAll } from '../../types/automata/sheet-data.interface'
 import { SheetViewData } from 'src/types/sheet-view-data.interface'
-import { DepartureTimeResponse } from 'src/types/automata/departure-time.interface'
-import DepartureTime from './components/DepartureTime'
 
-type AppStatusAction = "APP_UP" | "APP_DOWN" | "INTERNET_UP" | "INTERNET_DOWN"
+type AppStatusAction =
+    'APP_UP' | 'APP_DOWN' | 'INTERNET_UP' | 'INTERNET_DOWN' | 'TODAY_NOT_FOUND' | 'TODAY_FOUND'
 
 const reducer = (state: AppStatus, action: { type: AppStatusAction }): AppStatus => {
     switch (action.type) {
-        case "APP_UP": {
+        case 'APP_UP': {
             return {
                 credential: true,
-                internet: true
+                internet: true,
+                today: true
             }
         }
-        case "APP_DOWN": {
+        case 'APP_DOWN': {
             return {
                 credential: false,
-                internet: false
+                internet: false,
+                today: false,
             }
         }
-        case "INTERNET_UP": {
+        case 'INTERNET_UP': {
             return {
                 ...state,
                 internet: true
             }
         }
-        case "INTERNET_DOWN": {
+        case 'INTERNET_DOWN': {
             return {
                 ...state,
                 internet: false
             }
         }
-        default: return state
+        case 'TODAY_NOT_FOUND': {
+            return {
+                ...state,
+                today: false
+            }
+        }
+        case 'TODAY_FOUND': {
+            return {
+                ...state,
+                today: true
+            }
+        }
+        default:
+            return state
     }
 }
 
@@ -63,43 +79,48 @@ const initialValuesFromSheet: SheetViewData = {
         description: 'Início do almoço',
         value: null
     },
-    finishLunch:  {
+    finishLunch: {
         action: 'FIM_ALM',
         description: 'Fim do almoço',
         value: null
     },
-    finishWorkingHours:  {
+    finishWorkingHours: {
         action: 'FIM_EXP',
         description: 'Fim do expediente',
         value: null
-    },
+    }
 }
 
 const App = (): JSX.Element => {
     const [isOpen, setIsOpen] = useState(false)
-    const [workingTimes, setWorkingTimes] = useState<string>("")
+    const [workingTimes, setWorkingTimes] = useState<string>('')
     const [requestStatus, setRequestStatus] = useState<LoadingStatus>('idle')
     const [credentials, setCredentials] = useState<CredentialsInfo>({
-        id: "",
-        clientEmail: "",
-        privateKey: ""
+        id: '',
+        clientEmail: '',
+        privateKey: ''
     })
+
+    const [expectedWorkingTimeTotal, setExpectedWorkingTimeTotal] = useState<string>('')
 
     const [valuesFromSheet, setValuesFromSheet] = useState<SheetViewData>({
         ...initialValuesFromSheet
     })
 
-    const resetValuesFromSheet = () => {
+    const saveToLocalStorage = (event: any) => {
+        window.api.savePreference('workingTime', event.target.value)
+    }
+    const resetValuesFromSheet = (): void => {
         setValuesFromSheet({ ...initialValuesFromSheet })
     }
 
     const [appStatus, dispatch] = useReducer(reducer, {
         credential: false,
-        internet: false
-    });
+        internet: false,
+        today: false
+    })
 
-
-    const updateId = async (id: string) => {
+    const updateId = async (id: string): Promise<void> => {
         setCredentials((prev) => ({
             ...prev,
             id
@@ -108,26 +129,26 @@ const App = (): JSX.Element => {
         await getWorkingTimes()
     }
 
-    const updateClientEmail = (clientEmail: string) => {
+    const updateClientEmail = (clientEmail: string): void => {
         setCredentials((prev) => ({
             ...prev,
             clientEmail
         }))
     }
 
-    const updatePrivateKey = (privateKey: string) => {
+    const updatePrivateKey = (privateKey: string): void => {
         setCredentials((prev) => ({
             ...prev,
             privateKey
         }))
     }
 
-    function openClose() {
+    const openClose = (): void => {
         setIsOpen((prev) => !prev)
     }
 
-    const onClickAction = async (option: AvailableCommands) => {
-        if (!appStatus.credential || !appStatus.internet) return
+    const onClickAction = async (option: AvailableCommands): Promise<void> => {
+        if (!appStatus.credential || !appStatus.internet || !appStatus.today) return
 
         setRequestStatus('loading')
         try {
@@ -140,11 +161,10 @@ const App = (): JSX.Element => {
         }
     }
 
-    const getWorkingTimes = async () => {
+    const getWorkingTimes = async (): Promise<void> => {
         try {
             const workingTimes = await window.api.executeGetWorkTimes()
             await updateValuesFromSheet()
-            console.log('workingTimes', workingTimes)
 
             if ('workingTimeTotal' in workingTimes) {
                 setWorkingTimes(workingTimes.workingTimeTotal)
@@ -152,11 +172,12 @@ const App = (): JSX.Element => {
                 dispatch({ type: 'APP_UP' })
             }
         } catch (error) {
+            dispatch({ type: 'TODAY_NOT_FOUND' })
             setErrorSystemError()
         }
     }
 
-    const updateValuesFromSheet = async () => {
+    const updateValuesFromSheet = async (): Promise<void> => {
         try {
             const valuesFromSheet = await window.api.getTodaySheetTimes()
 
@@ -166,7 +187,7 @@ const App = (): JSX.Element => {
                     startWorkingHours: {
                         ...prev.startWorkingHours,
                         value: valuesFromSheet.startWorkingHours
-                    } ,
+                    },
                     startLunch: {
                         ...prev.startLunch,
                         value: valuesFromSheet.startLunch
@@ -186,10 +207,19 @@ const App = (): JSX.Element => {
         }
     }
 
-    const setErrorSystemError = () => {
+    const setErrorSystemError = (): void => {
         resetValuesFromSheet()
         setRequestStatus('error')
         dispatch({ type: 'APP_DOWN' })
+    }
+
+    const onChangeFinalDepartureTime = (event: any) => {
+        const value = event.target.value
+
+        window.api.savePreference('workingTime', {
+            value
+        })
+        setExpectedWorkingTimeTotal(value)
     }
 
     const updateAll: UpdateAll = {
@@ -199,35 +229,15 @@ const App = (): JSX.Element => {
         checkOnUpdate: getWorkingTimes
     }
 
-    const calculateExpectedFinalTime = useMemo((): DepartureTimeResponse => {
-        const startWorkingHourTime = valuesFromSheet.startWorkingHours.value
-        const startLunchTime = valuesFromSheet.startLunch.value
-        const finishLunchTime = valuesFromSheet.finishWorkingHours.value
-    
-
-        if (startWorkingHourTime && startLunchTime && finishLunchTime) {
-           return window.api.departureTime({ 
-                startWorkingHourTime, 
-                startLunchTime, 
-                expectedWorkingTimes: "17:30", 
-                finishLunchTime 
-            })
-        }
-
-        return {
-            totalLunch: "",
-            expectedFinalWorkingTime: ""
-        }
-    }, [valuesFromSheet.startWorkingHours, valuesFromSheet.startLunch, valuesFromSheet.finishWorkingHours])
-
-
     useEffect(() => {
-        window.api.internetPing().then(() => {
-            dispatch({ type: "INTERNET_UP" })
-
-        }).catch(() => {
-            dispatch({ type: "INTERNET_DOWN" })
-        })
+        window.api
+            .internetPing()
+            .then(() => {
+                dispatch({ type: 'INTERNET_UP' })
+            })
+            .catch(() => {
+                dispatch({ type: 'INTERNET_DOWN' })
+            })
     }, [])
 
     useEffect(() => {
@@ -235,28 +245,31 @@ const App = (): JSX.Element => {
             return await window.api.loadPreferences<UserPreferences>()
         }
 
-        read().then((result) => {
-            if ('credentials' in result) {
-                setCredentials((prev) => ({
-                    ...prev,
-                    ...result.credentials
-                }))
+        read()
+            .then((result) => {
+                if ('credentials' in result) {
+                    setCredentials((prev) => ({
+                        ...prev,
+                        ...result.credentials
+                    }))
 
-                getWorkingTimes()
-            }
-        }).catch(() => {
-            setErrorSystemError()
-        })
+                    setExpectedWorkingTimeTotal(result.workingTime.value)
+                    getWorkingTimes()
+                }
+            })
+            .catch(() => {
+                setErrorSystemError()
+            })
     }, [])
 
     useEffect(() => {
-        const handleKeyPress = (event: KeyboardEvent) => {
+        const handleKeyPress = (event: KeyboardEvent): void => {
             console.log(`You pressed ${event.key}`)
         }
 
         window.addEventListener('keyup', handleKeyPress)
 
-        return () => {
+        return (): void => {
             window.removeEventListener('keyup', handleKeyPress)
         }
     }, [])
@@ -265,7 +278,7 @@ const App = (): JSX.Element => {
         if (requestStatus === 'success') {
             setTimeout(() => {
                 setRequestStatus('idle')
-            }, 2000);
+            }, 2000)
         }
     }, [requestStatus])
 
@@ -274,55 +287,77 @@ const App = (): JSX.Element => {
         getWorkingTimes()
     }, [])
 
-    return (<>
-        <div className="shortCuts_button">
-            <img
-                style={{ color: 'white' }}
-                alt="logo"
-                className="shortcut_button"
-                src={keyboard}
-                onClick={openClose}
+    useEffect(() => {
+        if (expectedWorkingTimeTotal.length) saveToLocalStorage(expectedWorkingTimeTotal)
+    }, [])
+
+    return (
+        <>
+            <div className="shortCuts_button">
+                <img
+                    style={{ color: 'white' }}
+                    alt="logo"
+                    className="shortcut_button"
+                    src={keyboard}
+                    onClick={openClose}
+                />
+            </div>
+
+            <ShortCuts isOpen={isOpen} />
+
+            <Logo credential={appStatus} />
+
+            <Status
+                appStatus={appStatus}
+                credentials={credentials}
+                updateAll={updateAll}
             />
-        </div>
 
-        <ShortCuts isOpen={isOpen} />
+            <div className="creator">Automatizando processos</div>
+            <div className="creator">Created by Diego Kennedy</div>
+            <div className="text">
+                Electron app with <span className="react">React</span>
+                &nbsp;and <span className="ts">TypeScript</span>
+            </div>
 
-        <Logo credential={appStatus.credential} />
+            <Clock />
 
-        <Status
-            appStatus={appStatus}
-            credentials={credentials}
-            updateAll={updateAll}
-        />
+            {/* <p className="tip"> */}
+            {/* Please try pressing <code>F12</code> to open the devTool */}
+            {/* Aqui pode ter uma explicação do app */}
+            {/* </p> */}
 
-        <div className="creator">Automatizando processos</div>
-        <div className="creator">Created by Diego Kennedy</div>
-        <div className="text">
-            Electron app with <span className="react">React</span>
-            &nbsp;and <span className="ts">TypeScript</span>
-        </div>
+            <div className='actions'>
+                <Actions
+                    appStatus={appStatus}
+                    onClickAction={onClickAction}
+                    sheetValues={valuesFromSheet}
+                />
+            </div>
 
-        <Clock />
+            <div style={{ paddingTop: '3rem' }}>
+                <Loading status={requestStatus} />
+            </div>
 
-        {/* <p className="tip"> */}
-        {/* Please try pressing <code>F12</code> to open the devTool */}
-        {/* Aqui pode ter uma explicação do app */}
-        {/* </p> */}
+            <WorkingTimes workingTimesTotal={workingTimes} />
 
-        <Actions
-            appStatus={appStatus}
-            onClickAction={onClickAction}
-            sheetValues={valuesFromSheet}
-        />
+            <FinalDepartureTime
+                expectedWorkingTimeTotal={expectedWorkingTimeTotal}
+                onChange={onChangeFinalDepartureTime}
+            />
 
-        <div style={{ paddingTop: '3rem' }}>
-            <Loading status={requestStatus} />
-        </div>
+            <DepartureTime
+                startWorkingHours={valuesFromSheet.startWorkingHours.value}
+                startLunch={valuesFromSheet.startLunch.value}
+                finishLunch={valuesFromSheet.finishLunch.value}
+                expectedWorkingTimes={expectedWorkingTimeTotal}
+            />
 
-        <WorkingTimes workingTimesTotal={workingTimes} />
-        <DepartureTime totalHoursAtLunch={calculateExpectedFinalTime.totalLunch} dayTotalTime={'17:30'} expectedFinalWorkingHour={calculateExpectedFinalTime.expectedFinalWorkingTime} />
-        <Versions idSheet={credentials.id} />
-    </>)
+            <Versions idSheet={credentials.id} />
+
+            <button onClick={() => window.api.job('23:47')}>JOB TEST</button>
+        </>
+    )
 }
 
 export default App
