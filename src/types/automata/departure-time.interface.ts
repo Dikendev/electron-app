@@ -1,7 +1,7 @@
 interface Times {
-    startWorkingHourTime: string
-    startLunchTime: string
-    finishLunchTime: string
+    startWorkingHours: string
+    startLunch: string
+    finishLunch: string
     expectedWorkingTimes: string
 }
 
@@ -10,7 +10,4 @@ interface DepartureTimeResponse {
     expectedFinalWorkingTime: string
 }
 
-export type {
-    Times, 
-    DepartureTimeResponse
-}
+export type { Times, DepartureTimeResponse }
