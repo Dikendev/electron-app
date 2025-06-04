@@ -1,78 +1,67 @@
-import { useCallback } from "react"
-import AppStatus from "../../../types/app-status.interface"
-import { AvailableCommands, SheetCellContentFilled } from "../../../types/automata"
-import { ExistOrNot } from "../../../types/automata/sheet-data.interface"
-import Tooltip from "./Tooltip"
+import { useMemo } from 'react'
+
+import AppStatus from '../../../types/app-status.interface'
+import { AvailableCommands } from '../../../types/automata'
+import { ExistOrNot } from '../../../types/automata/sheet-data.interface'
+import { SheetCellContentFilledValue, SheetViewData } from 'src/types/sheet-view-data.interface'
+
+import Tooltip from './Tooltip'
+import ShortCuts from './Shortcuts'
+
+import { Button } from 'antd'
 
 interface ActionsProps {
     appStatus: AppStatus
-    sheetValues: SheetCellContentFilled
+    sheetValues: SheetViewData
     onClickAction: (options: AvailableCommands) => void
 }
 
-const Actions = ({
-    appStatus,
-    onClickAction,
-    sheetValues
-}: ActionsProps): JSX.Element => {
-    return (
-        <div className="actions">
+const Actions = ({ appStatus, onClickAction, sheetValues }: ActionsProps): JSX.Element[] => {
+    return Object.keys(sheetValues).map((sheet) => {
+        const sheetCellContent = sheetValues[sheet] as SheetCellContentFilledValue
+
+        return (
             <ActionStatus
-                appStatus={appStatus.credential}
-                sheetValue={sheetValues.startWorkingHours}
-                description="Início do expediente"
-                onClick={() => onClickAction('INICIO_EXP')}
+                key={sheet}
+                appStatus={appStatus}
+                sheetValue={sheetCellContent.value}
+                sheetCellContent={sheetCellContent}
+                onClick={() => onClickAction(sheetCellContent.action)}
             />
-            <ActionStatus
-                appStatus={appStatus.credential}
-                sheetValue={sheetValues.startLunch}
-                description="Início do almoço"
-                onClick={() => onClickAction('INICIO_ALM')}
-            />
-            <ActionStatus
-                appStatus={appStatus.credential}
-                sheetValue={sheetValues.finishLunch}
-                description="Fim do almoço"
-                onClick={() => onClickAction('FIM_ALM')}
-            />
-            <ActionStatus
-                appStatus={appStatus.credential}
-                sheetValue={sheetValues.finishWorkingHours}
-                description="Fim do expediente"
-                onClick={() => onClickAction('FIM_EXP')}
-            />
-        </div>
-    )
+        )
+    })
 }
 
 interface ActionStatusProps {
-    appStatus: boolean
+    appStatus: AppStatus
     sheetValue: ExistOrNot
-    description: string
+    sheetCellContent: SheetCellContentFilledValue
     onClick: () => void
 }
 
 const ActionStatus = ({
     appStatus,
     sheetValue,
-    description,
+    sheetCellContent,
     onClick
 }: ActionStatusProps): JSX.Element => {
-    const buttonDescriptionClass = useCallback(() => {
-        return sheetValue ? 'registered' : ''
-    }, [description])
+    // const buttonDescriptionClass = useMemo(() => {
+    //     return sheetValue ? 'registered' : ''
+    // }, [sheetValue])
 
-    const appStatusStyle = useCallback(() => {
-        return  appStatus ? 'action' : 'action disabled'
-    }, [appStatus])
+    const buttonDisabled = useMemo(() => {
+        return !appStatus.credential || !appStatus.internet
+    }, [appStatus.credential, appStatus.internet])
 
     return (
         <div
             style={{ position: 'relative' }}
-            className={`${buttonDescriptionClass()} ${appStatusStyle()}`}
-            onClick={() => onClick()}>
-            <a>{description}</a>
+        >
+            <Button type="primary" disabled={buttonDisabled} onClick={onClick}>
+                {sheetCellContent.description}
+            </Button>
             <SheetValues sheetValues={sheetValue} />
+            <ShortCuts shortCut={sheetCellContent.shortcut} />
         </div>
     )
 }
@@ -86,20 +75,20 @@ const SheetValues = ({ sheetValues }: SheetValuesProp): JSX.Element => {
         <code
             style={{
                 position: 'absolute',
-                top: -15,
-                left: 50,
-                right: 50,
-                width: '5rem',
-                textAlign: "center",
-                borderRadius: "0.3rem"
-            }}>
+                top: -5,
+                left: '50%',
+                right: '50%',
+                width: 'fit-content',
+                textAlign: 'center',
+                transform: 'translate(-50%, -50%)',
+                borderRadius: '0.3rem'
+            }}
+        >
             {sheetValues ? (
-                <Tooltip
-                    className="tip"
-                    description={sheetValues}
-                    tooltip="Horário registrado"
-                />
-            ) : ('-')}
+                <Tooltip className="tip" description={sheetValues} tooltip="Horário registrado" />
+            ) : (
+                '-'
+            )}
         </code>
     )
 }

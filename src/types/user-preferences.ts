@@ -10,6 +10,7 @@ interface UserPreferences {
     windowBounds: {
         width: number, height: number
     },
+    workingTime: { value: string },
     credentials: CredentialsInfo
 }
 

@@ -1,6 +1,6 @@
-import { GoogleSpreadsheetWorksheet } from "google-spreadsheet"
-import CellManager from "./cell-validation"
-import { SheetCellContentFilled, SheetData } from "../../../types/automata"
+import { GoogleSpreadsheetWorksheet } from 'google-spreadsheet'
+import CellManager from './cell-validation'
+import { SheetCellContentFilled, SheetData } from '../../../types/automata'
 
 class CellData {
     static todayValues(
