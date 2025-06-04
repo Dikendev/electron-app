@@ -6,25 +6,25 @@ interface ShortcutsCommands {
 
 export const START_WORKING_HOURS: ShortcutsCommands = {
     win: 'ctrl + e',
-    mac: 'command + e',
+    mac: 'ctrl + e',
     linux: 'Alt+Cmd+I'
 }
 
 export const FINISH_WORKING_HOURS: ShortcutsCommands = {
     win: 'ctrl + f',
-    mac: 'command + f',
+    mac: 'ctrl + f',
     linux: 'Alt+Cmd+F'
 }
 
 export const START_LUNCH: ShortcutsCommands = {
     win: 'ctrl + a',
-    mac: 'command + a',
+    mac: 'ctrl + a',
     linux: 'Alt+Cmd+L'
 }
 
 export const FINISH_LUNCH: ShortcutsCommands = {
     win: 'ctrl + b',
-    mac: 'command + b',
+    mac: 'ctrl + b',
     linux: 'Alt+Cmd+J'
 }
 

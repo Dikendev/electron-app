@@ -311,7 +311,8 @@ const Automata = (): JSX.Element => {
                 flexDirection: 'column',
                 justifyContent: 'center',
                 alignItems: 'center',
-                color: 'white'
+                color: 'white',
+                gap: '1rem'
             }}
         >
             <Logo credential={appStatus} />
