@@ -5,7 +5,7 @@ class StringUtils {
     }
 
     static removeAccents = (word: string): string => {
-        return word.normalize().replace(/[\u0300-\u036f]/g, '')
+        return word.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
     }
 }
 
