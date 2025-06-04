@@ -1,41 +1,53 @@
-import { GoogleSpreadsheetCell, GoogleSpreadsheetWorksheet } from "google-spreadsheet"
-import { CellNotFoundError } from "../errors/cell-not-found-error"
-import DateUtils from "../utils/date-utils"
-import { AvailableCommands, KeyOption, SheetData, } from "../../../types/automata"
-import SheetDataEnum from "../../../types/automata/sheet-data.enum"
-import CellManager from "./cell-validation"
-import CellData from "./cell-data"
-import { TodaySheetTimesResult, WorkingTimesResult } from "../../../types/automata/automata-result.interface"
-import StringUtils from "../utils/string-utils"
+import { GoogleSpreadsheetCell, GoogleSpreadsheetWorksheet } from 'google-spreadsheet'
+import { CellNotFoundError } from '../errors/cell-not-found-error'
+
+import StringUtils from '../utils/string-utils'
+import DateUtils from '../utils/date-utils'
+
+import CellManager from './cell-validation'
+import CellData from './cell-data'
+
+import {
+    TodaySheetTimesResult,
+    WorkingTimesResult
+} from '../../../types/automata/automata-result.interface'
+import SheetDataEnum from '../../../types/automata/sheet-data.enum'
+import { AvailableCommands, KeyOption, SheetData } from '../../../types/automata'
 
 class InitAutomata {
     private sheet: GoogleSpreadsheetWorksheet
 
     constructor(sheet: GoogleSpreadsheetWorksheet) {
-        this.sheet = sheet
+        this.sheet = sheet;
     }
 
     execute = async (option: AvailableCommands): Promise<TodaySheetTimesResult> => {
-        await this.sheet.loadCells()
+        // if (!ValidationManager.isMonthValid(this.sheet.title)) return new MonthInvalidError()
 
-        let foundCell = this.searchForSheetTitles()
+        await this.sheet.loadCells();
 
-        const { daysCol, startTime1ndCol, finishTime1ndCol, startTime2ndCol, finishTime2ndCol } = foundCell
+        const foundCell = this.searchForSheetTitles();
 
-        const cellValidation = CellManager.isCellValid(
-            {
-                daysCol,
-                startTime1ndCol,
-                finishTime1ndCol,
-                startTime2ndCol,
-                finishTime2ndCol
-            }
-        )
+        const {
+            daysCol,
+            startTime1ndCol,
+            finishTime1ndCol,
+            startTime2ndCol,
+            finishTime2ndCol
+        } = foundCell;
 
-        if (!cellValidation) return new CellNotFoundError()
+        const cellValidation = CellManager.isCellValid({
+            daysCol,
+            startTime1ndCol,
+            finishTime1ndCol,
+            startTime2ndCol,
+            finishTime2ndCol
+        });
 
-        const hourAndMinutes = DateUtils.getActualHourAndTime()
-        const dayCell = this.sheet.getCell(0, foundCell.daysCol)
+        if (!cellValidation) return new CellNotFoundError();
+
+        const hourAndMinutes = DateUtils.getActualHourAndTime();
+        const dayCell = this.sheet.getCell(0, foundCell.daysCol);
 
         for (let row = foundCell.fistRow; row < this.sheet.rowCount; row++) {
             const cell = this.sheet.getCell(row, dayCell.columnIndex)
@@ -47,28 +59,29 @@ class InitAutomata {
                 await this.sheet.saveUpdatedCells()
                 const totalWorkingHours = this.cellRangeWorkingHours(foundCell)
 
-                this.updateTotalWorkingHours(foundCell, totalWorkingHours)
+                foundCell.totalWorkingHours = totalWorkingHours
             }
         }
         return CellData.todayValues(this.sheet, foundCell)
     }
 
     todayValues = async (): Promise<TodaySheetTimesResult> => {
+        // if (!ValidationManager.isMonthValid(this.sheet.title)) return new MonthInvalidError()
+
         await this.sheet.loadCells()
 
-        let foundCell = this.searchForSheetTitles()
+        const foundCell = this.searchForSheetTitles()
 
-        const { daysCol, startTime1ndCol, finishTime1ndCol, startTime2ndCol, finishTime2ndCol } = foundCell
+        const { daysCol, startTime1ndCol, finishTime1ndCol, startTime2ndCol, finishTime2ndCol } =
+            foundCell
 
-        const cellValidation = CellManager.isCellValid(
-            {
-                daysCol,
-                startTime1ndCol,
-                finishTime1ndCol,
-                startTime2ndCol,
-                finishTime2ndCol
-            }
-        )
+        const cellValidation = CellManager.isCellValid({
+            daysCol,
+            startTime1ndCol,
+            finishTime1ndCol,
+            startTime2ndCol,
+            finishTime2ndCol
+        })
 
         if (!cellValidation) return new CellNotFoundError()
 
@@ -85,37 +98,43 @@ class InitAutomata {
     }
 
     executeWorkingHours = async (): Promise<WorkingTimesResult> => {
+
         await this.sheet.loadCells()
 
-        let foundCell = this.searchForSheetTitles()
+        const foundCell = this.searchForSheetTitles()
 
-        const { daysCol, startTime1ndCol, finishTime1ndCol, startTime2ndCol, finishTime2ndCol } = foundCell
-        const cellValidation = CellManager.isCellValid(
-            {
-                daysCol,
-                startTime1ndCol,
-                finishTime1ndCol,
-                startTime2ndCol,
-                finishTime2ndCol
-            }
-        )
+        const {
+            daysCol,
+            startTime1ndCol,
+            finishTime1ndCol,
+            startTime2ndCol,
+            finishTime2ndCol
+        } = foundCell;
 
-        if (!cellValidation) return new CellNotFoundError()
+        const cellValidation = CellManager.isCellValid({
+            daysCol,
+            startTime1ndCol,
+            finishTime1ndCol,
+            startTime2ndCol,
+            finishTime2ndCol
+        })
 
-        const dayCell = this.sheet.getCell(0, foundCell.daysCol)
+        if (!cellValidation) throw new CellNotFoundError()
 
         for (let row = foundCell.fistRow; row < this.sheet.rowCount; row++) {
-            const cell = this.sheet.getCell(row, dayCell.columnIndex)
+            const cell = this.sheet.getCell(row, daysCol)
 
             if (CellManager.isCellDateEqualsTodayDate(cell)) {
                 return {
-                    workingTimeTotal: this.cellRangeWorkingHours(foundCell).join(':')
+                    workingTimeTotal: this.cellRangeWorkingHours(foundCell)
                 }
             }
         }
 
+        if (foundCell.todaysRow === -1) throw new CellNotFoundError()
+
         return {
-            workingTimeTotal: ""
+            workingTimeTotal: ''
         }
     }
 
@@ -157,7 +176,7 @@ class InitAutomata {
     }
 
     private searchForSheetTitles = (): SheetData => {
-        let foundCell = this.initSheetData()
+        const foundCell = this.initSheetData()
 
         for (let row = 0; row < this.sheet.rowCount; row++) {
             for (let col = 0; col < this.sheet.columnCount; col++) {
@@ -168,11 +187,7 @@ class InitAutomata {
         return foundCell
     }
 
-    private handleNewCellValues = (
-        foundCell: SheetData,
-        row: number,
-        col: number
-    ): void => {
+    private handleNewCellValues = (foundCell: SheetData, row: number, col: number): void => {
         const cell = this.sheet.getCell(row, col)
         const colValue = cell.columnIndex
         const cellValue = cell.value
@@ -190,11 +205,21 @@ class InitAutomata {
                     break
                 }
                 case SheetDataEnum.WORKING_HOUR_START: {
-                    this.setRowAndColValues(foundCell, colValue, 'startTime1ndCol', 'startTime2ndCol')
+                    this.setRowAndColValues(
+                        foundCell,
+                        colValue,
+                        'startTime1ndCol',
+                        'startTime2ndCol'
+                    )
                     break
                 }
                 case SheetDataEnum.WORKING_HOUR_FINISH: {
-                    this.setRowAndColValues(foundCell, colValue, 'finishTime1ndCol', 'finishTime2ndCol')
+                    this.setRowAndColValues(
+                        foundCell,
+                        colValue,
+                        'finishTime1ndCol',
+                        'finishTime2ndCol'
+                    )
                     break
                 }
             }
@@ -219,7 +244,7 @@ class InitAutomata {
         }
     }
 
-    private cellRangeWorkingHours = (foundCell: SheetData): string[] => {
+    private cellRangeWorkingHours = (foundCell: SheetData): string => {
         const sum = new Date()
         sum.setHours(0, 0, 0, 0)
 
@@ -235,40 +260,26 @@ class InitAutomata {
                 const startWorkingHours = this.sheet.getCell(row, foundCell.workingTimesCol)
 
                 if (startWorkingHours.formattedValue) {
-                    const hours = startWorkingHours.formattedValue.split(":")
+                    const hours = startWorkingHours.formattedValue.split(':')
                     result.push(hours)
                 }
             }
         }
 
         const totalSeconds = this.sunAllTimes(result)
-        return this.secondsToTime(totalSeconds);
+        return DateUtils.secondsToTime(totalSeconds)
     }
 
-    private updateTotalWorkingHours = (foundCell: SheetData, totalTime: string[]) => {
-        foundCell.totalWorkingHours = totalTime.join(':')
+    private sunAllTimes = (result: string[][]): number => {
+        return result.reduce((sum, time) => sum + DateUtils.timeToSeconds([time[0], time[1]]), 0)
     }
-
-    private sunAllTimes = (result: string[][]) => {
-        return result.reduce((sum, time) => sum + this.timeToSeconds([time[0], time[1]]), 0);
-    }
-
-    private timeToSeconds = ([hh, mm]: [string, string]) => {
-        return parseInt(hh, 10) * 3600 + parseInt(mm, 10) * 60;
-    };
-
-    private secondsToTime = (totalSeconds: number) => {
-        const hours = Math.floor(totalSeconds / 3600);
-        const minutes = Math.floor((totalSeconds % 3600) / 60);
-        return [hours.toString().padStart(2, '0'), minutes.toString().padStart(2, '0')];
-    };
 
     private initSheetData = (): SheetData => {
         return {
             coopSheet: 'sheet',
             todaysRow: -1,
             fistRow: -1,
-            totalWorkingHours: "",
+            totalWorkingHours: '',
             daysCol: -1,
             workingTimesCol: -1,
             startTime1ndCol: -1,

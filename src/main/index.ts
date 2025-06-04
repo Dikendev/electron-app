@@ -1,29 +1,40 @@
-import { app, shell, BrowserWindow, ipcMain, Tray, Menu, dialog } from 'electron'
+import { app, shell, BrowserWindow, ipcMain, Tray, Menu, dialog, Notification } from 'electron'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
-import icon from '../../resources/icon.png?asset'
+import { handleMessageFromRenderer } from './handle-message-from-renderer'
 import { join } from 'path'
+import axios from 'axios'
+import { CronJob, sendAt } from 'cron'
+
+import icon from '../../resources/icon.png?asset'
 import { HandleFiles, IconHandle, Store, TrayManager } from './classes'
+
 import { UserPreferences } from '../types/user-preferences'
 import { IStore } from '../types/store.interface'
 import GoogleSheetAuth from './automata/automata/google-sheet-auth'
 import InitAutomata from './automata/automata/automata'
 import { AvailableCommands } from '../types/automata'
-import { TodaySheetTimesResult, WorkingTimesResult } from '../types/automata/automata-result.interface'
-import axios from 'axios'
-import { handleMessageFromRenderer } from './handle-message-from-renderer'
+import {
+    TodaySheetTimesResult,
+    WorkingTimesResult
+} from '../types/automata/automata-result.interface'
 import { CredentialsInfo } from '../types/credentials-info.interface'
 
 const userConfig = new Store(app)
+
+const INITIAL_APP_NOTIFICATION = 'Basic Notification'
+const INITIAL_APP_NOTIFICATION_BODY = 'Notification from the Main process'
 
 let mainWindow: BrowserWindow
 
 if (!app.requestSingleInstanceLock()) {
     app.quit()
 } else {
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
+    // This method will be called when Electron has finished
+    // initialization and is ready to create browser windows.
+    // Some APIs can only be used after this event occurs.
     app.whenReady().then(async () => {
+        showInitialNotification()
+
         const filesManager = new HandleFiles(dialog)
 
         // Set app user model id for windows
@@ -42,14 +53,14 @@ if (!app.requestSingleInstanceLock()) {
         tray.setToolTip('Registrar horários cooperativa')
         tray.setContextMenu(contextMenu)
         // this is not working don't figure why
-        tray.on("right-click", () => {
+        tray.on('right-click', () => {
             console.log('right-click')
         })
-        
-        tray.on("click", () => {
+
+        tray.on('click', () => {
             mainWindow.isVisible() ? mainWindow.minimize() : mainWindow.show()
         })
-            
+
         // Default open or close DevTools by F12 in development
         // and ignore CommandOrControl + R in production.
         // see https://github.com/alex8088/electron-toolkit/tree/master/packages/utils
@@ -79,18 +90,40 @@ if (!app.requestSingleInstanceLock()) {
             return userConfig.loadConfig<T>()
         })
 
-        handleMessageFromRenderer('execute-work-automate', (
-            _event,
-            option: AvailableCommands
-        ): Promise<void> => executeWorkAutomate(option))
+        ipcMain.handle('job', (_event, timeToExecute: string): void => {
+            job(timeToExecute)
+        })
 
-        handleMessageFromRenderer('execute-get-work-times', (
-            _event,
-        ): Promise<WorkingTimesResult> => executeGetWorkTimes())
+        handleMessageFromRenderer(
+            'execute-work-automate',
+            (_event, option: AvailableCommands): Promise<void> => executeWorkAutomate(option)
+        )
 
-        handleMessageFromRenderer('get-today-sheet-times', (_event): Promise<TodaySheetTimesResult> => getTodaySheetValues())
+        handleMessageFromRenderer(
+            'execute-get-work-times',
+            (_event): Promise<WorkingTimesResult> => executeGetWorkTimes()
+        )
+
+        handleMessageFromRenderer(
+            'get-today-sheet-times',
+            (_event): Promise<TodaySheetTimesResult> => getTodaySheetValues()
+        )
 
         handleMessageFromRenderer('internet-ping', (_event): Promise<void> => internetPing())
+
+        // ipcMain.handle(
+        //     'departure-time',
+        //     (
+        //         _event,
+        //         { startWorkingHours, startLunch, expectedWorkingTimes, finishLunch }: Times
+        //     ): DepartureTimeResponse =>
+        //         calculateDepartureTime({
+        //             startWorkingHours,
+        //             startLunch,
+        //             expectedWorkingTimes,
+        //             finishLunch
+        //         })
+        // )
 
         await createWindow()
 
@@ -115,7 +148,8 @@ async function createWindow(): Promise<void> {
     const windowBounds = await userConfig.loadConfig<UserPreferences>()
 
     let windowConfig: {
-        width: number, height: number
+        width: number
+        height: number
     } = windowBounds.defaultConfig.windowBounds
 
     if ('windowBounds' in windowBounds) {
@@ -142,8 +176,10 @@ async function createWindow(): Promise<void> {
         const { width, height } = mainWindow.getBounds()
 
         const updatedConfig = {
-            ...userConfig, windowBounds: {
-                width, height
+            ...userConfig,
+            windowBounds: {
+                width,
+                height
             }
         }
 
@@ -164,9 +200,6 @@ async function createWindow(): Promise<void> {
     }
 
     mainWindow.webContents.on('before-input-event', (event, input) => {
-        // add all the shortcuts here.
-        // and see how to call the api calls and change the app variables.
-
         // call all my api calls and return the result to the view to handle the changes.
         if (input.control && input.key.toLowerCase() === 'i') {
             console.log('Pressed Ctrl+I')
@@ -181,7 +214,7 @@ async function createWindow(): Promise<void> {
 }
 
 async function internetPing(): Promise<void> {
-    const google = "https://www.google.com.br"
+    const google = 'https://www.google.com.br'
     await axios.get(google)
 }
 
@@ -202,12 +235,11 @@ async function executeGetWorkTimes(): Promise<WorkingTimesResult> {
 
 async function initAuth(): Promise<InitAutomata> {
     const windowBounds = await userConfig.loadConfig<UserPreferences>()
-    console.log('windowBounds', windowBounds)
 
     let credentials: CredentialsInfo = {
-        id: "",
-        privateKey: "",
-        clientEmail: ""
+        id: '',
+        privateKey: '',
+        clientEmail: ''
     }
 
     if ('credentials' in windowBounds) {
@@ -217,9 +249,42 @@ async function initAuth(): Promise<InitAutomata> {
     const googleSheetAuthCredentials = new GoogleSheetAuth({
         id: credentials.id,
         clientEmail: credentials.clientEmail,
-        privateKey: credentials.privateKey.replace(/\\n/g, '\n'),
+        privateKey: credentials.privateKey.replace(/\\n/g, '\n')
     })
 
     const sheet = await googleSheetAuthCredentials.loadSheet()
     return new InitAutomata(sheet)
+}
+
+function job(timeToExecute: string) {
+    console.log('timeToExecute', timeToExecute)
+    const [hour, min] = timeToExecute.split(':')
+
+    const notificationJob = new CronJob(
+        `${min} ${hour} * * *`,
+        function () {
+            new Notification({ title: 'JOB TEST', body: 'HORA DE IR EMBORA' }).show()
+        }, // onTick
+        null, // onComplete
+        true, // start
+        'system' // timeZone
+    )
+
+    const dt = sendAt(`${min} ${hour} * * *`)
+    console.log(`The job would run at: ${dt.toISO()}`)
+
+    notificationJob.start()
+}
+
+// interface Shownotification {
+//     title: string
+//     body: string
+// }
+
+// function showNotification({ title, body }: Shownotification) {
+//     new Notification({ title: title, body: body }).show()
+// }
+
+function showInitialNotification() {
+    new Notification({ title: INITIAL_APP_NOTIFICATION, body: INITIAL_APP_NOTIFICATION_BODY }).show()
 }

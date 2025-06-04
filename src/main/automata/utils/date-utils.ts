@@ -4,7 +4,8 @@ class DateUtils {
     static formatDateWithDayAndMonth(): string {
         const toDay = new Date()
         const toDayDateWithLeadingMissingZeros = String(toDay.getDate()).padStart(2, '0')
-        return `${toDayDateWithLeadingMissingZeros}/${toDay.getMonth() + String(toDay.getMonth() + 1)}`
+        const month = toDay.getMonth() + 1
+        return `${toDayDateWithLeadingMissingZeros}/${String(month).padStart(2, '0')}`
     }
 
     static addHourToDate(date: Date, hour: number) {
@@ -46,6 +47,16 @@ class DateUtils {
         const minutes = Number(splitHourAndMinutes[1])
         return (hours + minutes / 60) / 24;
     }
+
+    static timeToSeconds([hh, mm]: [string, string]): number {
+        return parseInt(hh, 10) * 3600 + parseInt(mm, 10) * 60;
+    };
+
+    static secondsToTime(totalSeconds: number): string {
+        const hours = Math.floor(totalSeconds / 3600) + 1;
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+    };
 }
 
 export default DateUtils
