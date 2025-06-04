@@ -1,21 +1,22 @@
 import { AvailableCommands } from "./automata"
 import { ExistOrNot } from "./automata/sheet-data.interface"
 
-interface SheetViewData
- {
+export interface SheetViewData {
     startWorkingHours: SheetCellContentFilledValue,
     startLunch: SheetCellContentFilledValue,
     finishLunch: SheetCellContentFilledValue,
     finishWorkingHours: SheetCellContentFilledValue
 }
 
-interface SheetCellContentFilledValue {
+export interface SheetCellContentFilledValueShortCut {
+    win: string;
+    mac: string;
+    linux: string;
+}
+
+export interface SheetCellContentFilledValue {
     action: AvailableCommands
     description: string
     value: ExistOrNot
-}
-
-export type {
-    SheetViewData,
-    SheetCellContentFilledValue
+    shortcut: SheetCellContentFilledValueShortCut;
 }

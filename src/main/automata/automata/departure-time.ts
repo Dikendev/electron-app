@@ -1,37 +1,49 @@
-import { DepartureTimeResponse, Times } from "../../../types/automata/departure-time.interface"
-import DateUtils from "../utils/date-utils"
+// import { DepartureTimeResponse, Times } from '../../../types/automata/departure-time.interface'
+// import DateUtils from '../utils/date-utils'
 
-const calculateDepartureTime = ({ 
-    startWorkingHourTime, 
-    startLunchTime, 
-    expectedWorkingTimes, 
-    finishLunchTime 
-}: Times): DepartureTimeResponse => {
-    const startAsSeconds = timeAsSeconds(startWorkingHourTime)
-    const startLunchAsSeconds = timeAsSeconds(startLunchTime)
-    const expectedWorkingTimeInSeconds = timeAsSeconds(expectedWorkingTimes)
-    const lunchSeconds = timeAsSeconds(finishLunchTime)
+// const calculateDepartureTime = ({
+//     startWorkingHours,
+//     startLunch,
+//     expectedWorkingTimes,
+//     finishLunch
+// }: Times): DepartureTimeResponse => {
+//     console.log('-----------')
 
-    const totalLunch = startLunchAsSeconds - lunchSeconds
-    const sum = (startAsSeconds + expectedWorkingTimeInSeconds) + (totalLunch)
+//     console.log('startWorkingHours', startWorkingHours)
+//     console.log('startLunch', startLunch)
+//     console.log('finishLunch', finishLunch)
+//     console.log('expectedWorkingTimes', expectedWorkingTimes)
 
-    return {
-        totalLunch: Math.abs(totalLunch).toString(),
-        expectedFinalWorkingTime: DateUtils.secondsToTime(sum)
-    }
-}
+//     console.log('-----------')
 
-const timeAsSeconds = (str: string) => {
-    const [asStringHour, asStringMinutes] = str.split(':')
-    return DateUtils.timeToSeconds([asStringHour, asStringMinutes])
-}
+//     const startAsSeconds = timeAsSeconds(startWorkingHours)
+//     const startLunchAsSeconds = timeAsSeconds(startLunch)
+//     const expectedWorkingTimeInSeconds = timeAsSeconds(expectedWorkingTimes)
+//     const lunchSeconds = timeAsSeconds(finishLunch)
 
-// const expectedTime = calculateDepartureTime({
-//     startWorkingHourTime: "08:30",
-//     startLunchTime: "12:35",
-//     finishLunchTime: "13:05",
-//     expectedWorkingTimes: "08:58"
-// })
+//     const totalLunch = startLunchAsSeconds - lunchSeconds
+//     const sum = startAsSeconds + expectedWorkingTimeInSeconds + totalLunch
 
+//     console.log(' expectedFinalWorkingTime: DateUtils.secondsToTime(sum)', DateUtils.secondsToTime(sum))
 
-export { calculateDepartureTime }
+//     console.log(' Math.abs(totalLunch).toString()', Math.abs(totalLunch).toString())
+
+//     return {
+//         totalLunch: Math.abs(totalLunch).toString(),
+//         expectedFinalWorkingTime: DateUtils.secondsToTime(sum)
+//     }
+// }
+
+// const timeAsSeconds = (str: string): number => {
+//     const [asStringHour, asStringMinutes] = str.split(':')
+//     return DateUtils.timeToSeconds([asStringHour, asStringMinutes])
+// }
+
+// // const expectedTime = calculateDepartureTime({
+// //     startWorkingHourTime: "08:30",
+// //     startLunchTime: "12:35",
+// //     finishLunchTime: "13:05",
+// //     expectedWorkingTimes: "08:58"
+// // })
+
+// export { calculateDepartureTime }

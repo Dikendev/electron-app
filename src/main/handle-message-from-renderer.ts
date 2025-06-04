@@ -1,5 +1,5 @@
-import { ipcMain, IpcMainInvokeEvent, ipcRenderer } from "electron"
-import { ChannelMessage } from "../types/channel-message.interface"
+import { ipcMain, IpcMainInvokeEvent, ipcRenderer } from 'electron'
+import { ChannelMessage } from '../types/channel-message.interface'
 
 const handleMessageFromRenderer = <T>(
     channel: string,
@@ -18,16 +18,10 @@ const handleMessageFromRenderer = <T>(
     })
 }
 
-const sendMessageToMain = async (
-    channel: string,
-    ...args: any[]
-): Promise<any> => {
+const sendMessageToMain = async (channel: string, ...args: any[]): Promise<any> => {
     const { message, error } = await ipcRenderer.invoke(channel, ...args)
     if (error) throw error
     return message
 }
 
-export {
-    handleMessageFromRenderer,
-    sendMessageToMain
-}
+export { handleMessageFromRenderer, sendMessageToMain }

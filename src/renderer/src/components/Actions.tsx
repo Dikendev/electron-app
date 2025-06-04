@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useMemo } from 'react'
 
 import AppStatus from '../../../types/app-status.interface'
 import { AvailableCommands } from '../../../types/automata'
@@ -6,6 +6,9 @@ import { ExistOrNot } from '../../../types/automata/sheet-data.interface'
 import { SheetCellContentFilledValue, SheetViewData } from 'src/types/sheet-view-data.interface'
 
 import Tooltip from './Tooltip'
+import ShortCuts from './Shortcuts'
+
+import { Button } from 'antd'
 
 interface ActionsProps {
     appStatus: AppStatus
@@ -15,49 +18,50 @@ interface ActionsProps {
 
 const Actions = ({ appStatus, onClickAction, sheetValues }: ActionsProps): JSX.Element[] => {
     return Object.keys(sheetValues).map((sheet) => {
-        const resultValue = sheetValues[sheet] as SheetCellContentFilledValue
+        const sheetCellContent = sheetValues[sheet] as SheetCellContentFilledValue
 
         return (
             <ActionStatus
                 key={sheet}
                 appStatus={appStatus}
-                sheetValue={resultValue.value}
-                description={resultValue.description}
-                onClick={() => onClickAction(resultValue.action)}
+                sheetValue={sheetCellContent.value}
+                sheetCellContent={sheetCellContent}
+                onClick={() => onClickAction(sheetCellContent.action)}
             />
         )
     })
 }
 
 interface ActionStatusProps {
-    appStatus: AppStatus;
-    sheetValue: ExistOrNot;
-    description: string;
-    onClick: () => void;
+    appStatus: AppStatus
+    sheetValue: ExistOrNot
+    sheetCellContent: SheetCellContentFilledValue
+    onClick: () => void
 }
 
 const ActionStatus = ({
     appStatus,
     sheetValue,
-    description,
+    sheetCellContent,
     onClick
 }: ActionStatusProps): JSX.Element => {
-    const buttonDescriptionClass = useCallback(() => {
-        return sheetValue ? 'registered' : ''
-    }, [description])
+    // const buttonDescriptionClass = useMemo(() => {
+    //     return sheetValue ? 'registered' : ''
+    // }, [sheetValue])
 
-    const appStatusStyle = useCallback(() => {
-        return !appStatus.today ? 'action' : 'action disabled'
-    }, [appStatus])
+    const buttonDisabled = useMemo(() => {
+        return !appStatus.credential || !appStatus.internet
+    }, [appStatus.credential, appStatus.internet])
 
     return (
         <div
             style={{ position: 'relative' }}
-            className={`${buttonDescriptionClass()} ${appStatusStyle()}`}
-            onClick={() => onClick()}
         >
-            <a>{description}</a>
+            <Button type="primary" disabled={buttonDisabled} onClick={onClick}>
+                {sheetCellContent.description}
+            </Button>
             <SheetValues sheetValues={sheetValue} />
+            <ShortCuts shortCut={sheetCellContent.shortcut} />
         </div>
     )
 }
@@ -71,11 +75,12 @@ const SheetValues = ({ sheetValues }: SheetValuesProp): JSX.Element => {
         <code
             style={{
                 position: 'absolute',
-                top: -15,
-                left: 50,
-                right: 50,
-                width: '5rem',
+                top: -5,
+                left: '50%',
+                right: '50%',
+                width: 'fit-content',
                 textAlign: 'center',
+                transform: 'translate(-50%, -50%)',
                 borderRadius: '0.3rem'
             }}
         >
