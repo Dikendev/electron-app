@@ -5,9 +5,9 @@ interface Log {
 
 type Logs = Log[]
 
-interface LogsProps {
-    logs: Logs
-}
+// interface LogsProps {
+//     logs: Logs
+// }
 
 const Logs = ({ message, level }: Log): JSX.Element => {
     return (

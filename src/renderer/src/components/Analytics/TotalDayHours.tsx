@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import * as echarts from 'echarts';
 
 const TotalDayHours = () => {
-    const [chart, setChart] = useState<any>(null);
+    // const [chart, setChart] = useState<any>(null);
     const refChart = useRef<any>(null)
 
     useEffect(() => {
@@ -30,7 +30,7 @@ const TotalDayHours = () => {
                     }
                 ]
             });
-            setChart(chart)
+            // setChart(chart)
         }
     }, [])
 
